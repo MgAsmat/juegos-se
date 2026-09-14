@@ -271,6 +271,11 @@
     object-fit:cover; border-radius:6px; border:1px solid rgba(0,0,0,.14);
     box-shadow: var(--shadow-sm);
   }
+  .pieza-billete-icono{
+    display:block; width:56px; height:auto; aspect-ratio: 210/260;
+    object-fit:cover; border-radius:8px; border:1px solid rgba(0,0,0,.14);
+    box-shadow: var(--shadow-sm);
+  }
   .pieza-moneda-real{
     display:block; width:66px; height:auto; aspect-ratio: 1/1;
     filter: drop-shadow(0 2px 3px rgba(0,0,0,.25));
@@ -487,11 +492,19 @@
 
   /* ---------------- Piezas visuales ----------------
      Billetes y monedas usan la fotografía real de cada denominación
-     (assets/billetes, assets/monedas). */
+     (assets/billetes, assets/monedas). A tamaño de pregunta se
+     muestra el billete completo; a tamaño de ícono (tarjetas de
+     nivel, combinaciones) un billete completo se vuelve ilegible,
+     así que se usa un recorte cuadrado centrado en el numeral
+     grande de valor — mismo recurso, encuadre distinto. */
   var MONEDA_ARCHIVO = {0.10:'10c', 0.20:'20c', 0.50:'50c', 1:'1sol', 2:'2sol', 5:'5sol'};
 
   function billeteIMG(valor){
     return '<img class="pieza-svg pieza-billete" src="assets/billetes/' + valor + '.jpg" ' +
+      'alt="Billete de ' + valor + ' soles" loading="lazy" decoding="async">';
+  }
+  function billeteIconoIMG(valor){
+    return '<img class="pieza-svg pieza-billete-icono" src="assets/billetes/' + valor + '-icono.jpg" ' +
       'alt="Billete de ' + valor + ' soles" loading="lazy" decoding="async">';
   }
   function piezaMoneda(valor){
@@ -503,6 +516,9 @@
   function piezaSVG(valor){
     return BILLETES.indexOf(valor) !== -1 ? billeteIMG(valor) : piezaMoneda(valor);
   }
+  function piezaIcono(valor){
+    return BILLETES.indexOf(valor) !== -1 ? billeteIconoIMG(valor) : piezaMoneda(valor);
+  }
   function heartSVG(lleno){
     var color = lleno ? 'var(--wrong)' : 'var(--line)';
     return '<svg width="18" height="16" viewBox="0 0 20 18" aria-hidden="true">' +
@@ -513,7 +529,7 @@
     // como máximo 2 piezas visibles: a mayor tamaño de ícono, 3 o
     // más piezas superpuestas dejan de leerse con claridad.
     var html = '<div class="icono-row">';
-    valores.slice(0, 2).forEach(function(v){ html += '<div class="icono-pieza">' + piezaSVG(v) + '</div>'; });
+    valores.slice(0, 2).forEach(function(v){ html += '<div class="icono-pieza">' + piezaIcono(v) + '</div>'; });
     html += '</div>';
     return html;
   }
@@ -852,7 +868,7 @@
     } else if (p.combos){
       opcionesHtml = '<div class="combo-list" id="opciones">' +
         p.combos.map(function(c,i){
-          var piezasHtml = c.piezas.map(function(v){ return '<div class="pieza-mini">' + piezaSVG(v) + '</div>'; }).join('');
+          var piezasHtml = c.piezas.map(function(v){ return '<div class="pieza-mini">' + piezaIcono(v) + '</div>'; }).join('');
           return '<button class="combo-btn" data-i="' + i + '">' +
             '<div class="combo-piezas">' + piezasHtml + '</div>' +
             '<span class="combo-count">' + c.piezas.length + ' piezas</span>' +
