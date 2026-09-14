@@ -9,16 +9,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper: #FAF8F3;
+    --paper: #EEF7F6;
     --surface: #FFFFFF;
-    --ink: #1C2333;
-    --ink-soft: #656F87;
-    --ink-faint: #9AA2B5;
-    --accent: #BD8A2B;
-    --accent-deep: #93691C;
-    --accent-soft: #F3E7C8;
-    --line: #E8E3D7;
-    --line-soft: #F0ECE1;
+    --ink: #32384D;
+    --ink-soft: #626B80;
+    --ink-faint: #8F98AC;
+    --accent: #227CA3;
+    --accent-deep: #17607F;
+    --accent-soft: #DBEEF2;
+    --warm: #E1992E;
+    --warm-deep: #B97B1E;
+    --warm-soft: #FBE8CC;
+    --line: #D6E9E6;
+    --line-soft: #E7F2F0;
     --correct: #1F7A50;
     --correct-bg: #E5F3EA;
     --wrong: #B23C33;
@@ -26,22 +29,25 @@
     --radius-lg: 20px;
     --radius-md: 14px;
     --radius-sm: 10px;
-    --shadow-sm: 0 1px 2px rgba(28,35,51,.05);
-    --shadow-md: 0 4px 16px -8px rgba(28,35,51,.18);
+    --shadow-sm: 0 1px 2px rgba(50,56,77,.05);
+    --shadow-md: 0 4px 16px -8px rgba(50,56,77,.18);
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark){
     :root{
-      --paper: #12151F;
-      --surface: #1A1E2B;
-      --ink: #F1EFE7;
-      --ink-soft: #A2A9BE;
-      --ink-faint: #6E7488;
-      --accent: #E3B657;
-      --accent-deep: #F0C878;
-      --accent-soft: rgba(227,182,87,.14);
-      --line: rgba(255,255,255,.09);
-      --line-soft: rgba(255,255,255,.05);
+      --paper: #23283A;
+      --surface: #32384D;
+      --ink: #E9F4F2;
+      --ink-soft: #A9B4C7;
+      --ink-faint: #717C93;
+      --accent: #4FB4D6;
+      --accent-deep: #86D2ED;
+      --accent-soft: rgba(79,180,214,.16);
+      --warm: #F0AC4E;
+      --warm-deep: #F7C377;
+      --warm-soft: rgba(240,172,78,.16);
+      --line: rgba(186,223,219,.14);
+      --line-soft: rgba(186,223,219,.07);
       --correct: #57B98C;
       --correct-bg: rgba(87,185,140,.13);
       --wrong: #DE7B72;
@@ -118,7 +124,7 @@
     font-weight:700;
     letter-spacing:.08em;
     text-transform:uppercase;
-    color: var(--accent-deep);
+    color: var(--warm-deep);
   }
 
   /* ---------- Formularios ---------- */
@@ -211,9 +217,9 @@
   .icono-pieza{ width:30px; margin-right:-8px; }
   .icono-row .icono-pieza svg{ width:100%; display:block; }
   .icono-percent{
-    font-family:'Manrope',sans-serif; font-size:22px; font-weight:800; color: var(--accent-deep);
+    font-family:'Manrope',sans-serif; font-size:22px; font-weight:800; color: var(--warm-deep);
     width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-    background: var(--accent-soft);
+    background: var(--warm-soft);
   }
   .nivel-texto{ flex:1; min-width:0; }
   .nivel-badge{
@@ -222,8 +228,8 @@
     font-size:10.5px;
     font-weight:600;
     letter-spacing:.04em;
-    color: var(--accent-deep);
-    background: var(--accent-soft);
+    color: var(--warm-deep);
+    background: var(--warm-soft);
     padding:2px 8px;
     border-radius:999px;
     margin-bottom:5px;
@@ -235,8 +241,8 @@
   .game-top{ display:flex; align-items:center; justify-content:space-between; }
   .corazones{ display:flex; gap:4px; }
   .racha-badge{
-    display:flex; align-items:center; gap:6px; font-weight:700; font-size:13px; color: var(--accent-deep);
-    background: var(--accent-soft); padding:5px 10px 5px 6px; border-radius:999px;
+    display:flex; align-items:center; gap:6px; font-weight:700; font-size:13px; color: var(--warm-deep);
+    background: var(--warm-soft); padding:5px 10px 5px 6px; border-radius:999px;
   }
   .racha-badge .pieza-mini{ width:18px; }
   .racha-badge .pieza-mini svg{ width:100%; display:block; }
@@ -301,7 +307,7 @@
   .puntaje-label{ font-size:11.5px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:20px; }
   .resultado-stats{ display:flex; justify-content:center; gap:8px; margin-bottom:22px; }
   .resultado-stat{ flex:1; max-width:140px; background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-sm); padding:10px 6px; }
-  .resultado-stat b{ display:block; font-size:18px; font-weight:800; color:var(--accent-deep); }
+  .resultado-stat b{ display:block; font-size:18px; font-weight:800; color:var(--warm-deep); }
   .resultado-stat span{ font-size:11px; color:var(--ink-soft); font-weight:500; }
   .resultado-acciones{ display:flex; flex-direction:column; gap:9px; margin-top:4px; }
 
@@ -316,11 +322,11 @@
     font-weight:800; font-size:14px; color:#fff;
     margin-bottom:8px;
   }
-  .puesto-1 .medalla{ background: var(--accent); width:46px; height:46px; font-size:17px; }
+  .puesto-1 .medalla{ background: var(--warm); width:46px; height:46px; font-size:17px; }
   .puesto-2 .medalla{ background: #9AA2B5; }
   .puesto-3 .medalla{ background: #B4835A; }
   .podio-nombre{ font-weight:700; font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
-  .podio-puntaje{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:13px; color:var(--accent-deep); }
+  .podio-puntaje{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:13px; color:var(--warm-deep); }
   .podio-base{ margin-top:8px; width:100%; border-radius:6px 6px 0 0; background: var(--line-soft); }
   .puesto-1 .podio-base{ height:40px; }
   .puesto-2 .podio-base{ height:26px; }
@@ -361,7 +367,7 @@
     border-radius: var(--radius-sm);
     transition: background .12s ease, color .12s ease;
   }
-  .tab.activo{ color: var(--accent-deep); background: var(--accent-soft); }
+  .tab.activo{ color: var(--warm-deep); background: var(--warm-soft); }
 
   @media (prefers-reduced-motion: reduce){
     *{ transition:none !important; animation:none !important; }
@@ -389,14 +395,13 @@
   "use strict";
 
   /* ---------------- Datos base ----------------
-     Colores de billete aproximados a la familia vigente de billetes
-     del BCRP (2015-2021): S/10 verde, S/20 ocre, S/50 rosa,
-     S/100 azul-teal, S/200 morado. Ilustración estilizada en bloques
-     de color plano — no reproduce el diseño impreso real. */
+     Cada billete usa un tono distinto derivado de la paleta de marca
+     (navy #32384D, menta #BADFDB, teal #227CA3, ocre #E1992E).
+     Ilustración estilizada en bloques de color plano — no reproduce
+     el diseño impreso real de los billetes peruanos. */
   var BILLETES = [10,20,50,100,200];
   var MONEDAS = [0.10,0.20,0.50,1,2,5];
-  var COLOR_BILLETE = {10:'#3F9468',20:'#AD8A3E',50:'#BD4E76',100:'#1E80A8',200:'#7C5CA8'};
-  var COLOR_BILLETE_DEEP = {10:'#2A6B4A',20:'#7C6024',50:'#8A3253',100:'#145D7C',200:'#56397B'};
+  var COLOR_BILLETE = {10:'#5B9C93',20:'#E1992E',50:'#227CA3',100:'#17607F',200:'#32384D'};
 
   var ARTICULOS = [
     {nombre:'un cuaderno', precio:6.50},
@@ -478,7 +483,7 @@
      ilustrado y minimalista, de fantasía. No reproduce el diseño
      impreso real de los billetes y monedas peruanos. */
   function billeteSVG(valor){
-    var color = COLOR_BILLETE[valor] || '#3F9468';
+    var color = COLOR_BILLETE[valor] || '#227CA3';
     return '<svg viewBox="0 0 220 110" class="pieza-svg" role="img" aria-label="Billete fantasía de ' + valor + ' soles">' +
       '<rect x="1.5" y="1.5" width="217" height="107" rx="14" fill="' + color + '" stroke="rgba(0,0,0,.08)" stroke-width="1"/>' +
       '<text x="20" y="40" fill="#fff" font-family="Manrope, sans-serif" font-size="12" font-weight="700" letter-spacing="1" opacity=".85">SOLES</text>' +
@@ -489,7 +494,7 @@
   }
   function monedaSVG(valor){
     var esSol = valor >= 1;
-    var color = esSol ? '#C79A3D' : '#B0733F';
+    var color = esSol ? '#E1992E' : '#626B80';
     var label = valor < 1 ? Math.round(valor*100) + '¢' : ('S/' + valor);
     return '<svg viewBox="0 0 110 110" class="pieza-svg pieza-moneda" role="img" aria-label="Moneda fantasía de ' + label + '">' +
       '<circle cx="55" cy="55" r="49" fill="' + color + '" stroke="rgba(0,0,0,.1)" stroke-width="1"/>' +
@@ -519,7 +524,7 @@
   function cofreVacioSVG(){
     return '<svg viewBox="0 0 40 40"><rect x="6" y="16" width="28" height="18" rx="3" fill="none" stroke="var(--line)" stroke-width="2.5"/>' +
       '<path d="M6 16 L11 7 H29 L34 16" fill="none" stroke="var(--line)" stroke-width="2.5" stroke-linejoin="round"/>' +
-      '<circle cx="20" cy="24" r="2.6" fill="var(--accent)"/></svg>';
+      '<circle cx="20" cy="24" r="2.6" fill="var(--warm)"/></svg>';
   }
 
   /* ---------------- Generadores de preguntas ---------------- */
@@ -650,14 +655,14 @@
 
   var NIVELES = {
     primaria: [
-      { id:1, nombre:'Reconoce', desc:'Identifica el valor de billetes y monedas', gen: generarPreguntaReconoce, tiempo:16, icono: miniIconRow([20,1]), color:'#AD8A3E' },
-      { id:2, nombre:'Suma sencilla', desc:'Suma billetes y monedas', gen: generarPreguntaSuma, tiempo:18, icono: miniIconRow([0.5,0.5,1]), color:'#BD8A2B' },
-      { id:3, nombre:'El vuelto', desc:'Calcula el vuelto de una compra', gen: generarPreguntaVueltoSimple, tiempo:22, icono: miniIconRow([10]), color:'#3F9468' }
+      { id:1, nombre:'Reconoce', desc:'Identifica el valor de billetes y monedas', gen: generarPreguntaReconoce, tiempo:16, icono: miniIconRow([20,1]), color:'#E1992E' },
+      { id:2, nombre:'Suma sencilla', desc:'Suma billetes y monedas', gen: generarPreguntaSuma, tiempo:18, icono: miniIconRow([0.5,0.5,1]), color:'#227CA3' },
+      { id:3, nombre:'El vuelto', desc:'Calcula el vuelto de una compra', gen: generarPreguntaVueltoSimple, tiempo:22, icono: miniIconRow([10]), color:'#32384D' }
     ],
     secundaria: [
-      { id:4, nombre:'Combina', desc:'Paga con la menor cantidad de piezas', gen: generarPreguntaCombina, tiempo:25, icono: miniIconRow([50,10]), color:'#BD4E76' },
-      { id:5, nombre:'Vuelto exacto', desc:'Calcula el vuelto de compras múltiples', gen: generarPreguntaVueltoComplejo, tiempo:26, icono: miniIconRow([100,5]), color:'#1E80A8' },
-      { id:6, nombre:'Descuentos', desc:'Aplica porcentajes sobre un precio', gen: generarPreguntaDescuento, tiempo:22, icono: '<div class="icono-percent">%</div>', color:'#7C5CA8' }
+      { id:4, nombre:'Combina', desc:'Paga con la menor cantidad de piezas', gen: generarPreguntaCombina, tiempo:25, icono: miniIconRow([50,10]), color:'#B97B1E' },
+      { id:5, nombre:'Vuelto exacto', desc:'Calcula el vuelto de compras múltiples', gen: generarPreguntaVueltoComplejo, tiempo:26, icono: miniIconRow([100,5]), color:'#17607F' },
+      { id:6, nombre:'Descuentos', desc:'Aplica porcentajes sobre un precio', gen: generarPreguntaDescuento, tiempo:22, icono: '<div class="icono-percent">%</div>', color:'#5B9C93' }
     ]
   };
 
