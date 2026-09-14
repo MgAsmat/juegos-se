@@ -485,35 +485,19 @@
   }
 
   /* ---------------- Piezas visuales ----------------
-     Los billetes usan la fotografía real del anverso de cada
-     denominación (assets/billetes). Las monedas de 10, 20 y 50
-     céntimos y S/1 también usan foto real (assets/monedas); S/2 y
-     S/5 aún no tienen una foto disponible, así que siguen
-     ilustradas como un bloque de color plano de fantasía. */
-  var MONEDA_ARCHIVO = {0.10:'10c', 0.20:'20c', 0.50:'50c', 1:'1sol'};
+     Billetes y monedas usan la fotografía real de cada denominación
+     (assets/billetes, assets/monedas). */
+  var MONEDA_ARCHIVO = {0.10:'10c', 0.20:'20c', 0.50:'50c', 1:'1sol', 2:'2sol', 5:'5sol'};
 
   function billeteIMG(valor){
     return '<img class="pieza-svg pieza-billete" src="assets/billetes/' + valor + '.jpg" ' +
       'alt="Billete de ' + valor + ' soles" loading="lazy" decoding="async">';
   }
-  function monedaSVG(valor){
-    var esSol = valor >= 1;
-    var color = esSol ? '#E1992E' : '#626B80';
-    var label = valor < 1 ? Math.round(valor*100) + '¢' : ('S/' + valor);
-    return '<svg viewBox="0 0 110 110" class="pieza-svg pieza-moneda" role="img" aria-label="Moneda fantasía de ' + label + '">' +
-      '<circle cx="55" cy="55" r="49" fill="' + color + '" stroke="rgba(0,0,0,.1)" stroke-width="1"/>' +
-      '<circle cx="55" cy="55" r="39" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/>' +
-      '<text x="55" y="63" text-anchor="middle" fill="#fff" font-family="Manrope, sans-serif" font-size="20" font-weight="800">' + label + '</text>' +
-      '</svg>';
-  }
-  function monedaIMG(valor, archivo){
+  function piezaMoneda(valor){
+    var archivo = MONEDA_ARCHIVO[valor];
     var label = valor < 1 ? Math.round(valor*100) + ' céntimos' : ('S/ ' + valor);
     return '<img class="pieza-svg pieza-moneda pieza-moneda-real" src="assets/monedas/' + archivo + '.png" ' +
       'alt="Moneda de ' + label + '" loading="lazy" decoding="async">';
-  }
-  function piezaMoneda(valor){
-    var archivo = MONEDA_ARCHIVO[valor];
-    return archivo ? monedaIMG(valor, archivo) : monedaSVG(valor);
   }
   function piezaSVG(valor){
     return BILLETES.indexOf(valor) !== -1 ? billeteIMG(valor) : piezaMoneda(valor);
