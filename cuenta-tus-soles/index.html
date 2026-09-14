@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cuenta tus Soles — Juego de matemática con billetes y monedas del Perú</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800;9..144,900&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #F6EFDB;
+    --paper-deep: #EEE2BE;
+    --card: #FFFEFA;
+    --ink: #1B2947;
+    --ink-soft: #5B6685;
+    --ink-faint: #8B92A8;
+    --gold: #B8892B;
+    --gold-deep: #8B6420;
+    --gold-bright: #E7C574;
+    --gold-light: #F1E3BB;
+    --line: #E3D6AC;
+    --line-soft: #ECE1C2;
+    --correct: #256B4C;
+    --correct-bg: #E1F0E7;
+    --wrong: #A6332C;
+    --wrong-bg: #FAE6E3;
+    --silver: #A9B0BC;
+    --bronze: #B0743F;
+    --radius-lg: 26px;
+    --radius-md: 16px;
+    --radius-sm: 10px;
+    --shadow-card: 0 1px 2px rgba(27,41,71,.04), 0 10px 24px -16px rgba(27,41,71,.28);
+    --shadow-lift: 0 6px 14px -6px rgba(27,41,71,.22), 0 18px 34px -18px rgba(27,41,71,.3);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper: #121A2C;
+      --paper-deep: #0D1322;
+      --card: #1B2540;
+      --ink: #F1E9D2;
+      --ink-soft: #A9B1CC;
+      --ink-faint: #7C84A2;
+      --gold: #D9AE5C;
+      --gold-deep: #EFC77E;
+      --gold-bright: #F4D48C;
+      --gold-light: rgba(217,174,92,.16);
+      --line: rgba(217,174,92,.22);
+      --line-soft: rgba(217,174,92,.13);
+      --correct: #59BB93;
+      --correct-bg: rgba(89,187,147,.14);
+      --wrong: #E28079;
+      --wrong-bg: rgba(226,128,121,.15);
+      --silver: #C3CAD8;
+      --bronze: #CB9260;
+      --shadow-card: 0 1px 2px rgba(0,0,0,.3), 0 10px 24px -16px rgba(0,0,0,.55);
+      --shadow-lift: 0 6px 14px -6px rgba(0,0,0,.45), 0 18px 34px -18px rgba(0,0,0,.6);
+      color-scheme: dark;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,h2,h3, .display{
+    font-family: 'Fraunces', serif;
+    margin:0;
+    line-height:1.08;
+    text-wrap: balance;
+  }
+  .mono, .tabular{
+    font-family: 'IBM Plex Mono', 'Work Sans', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  .app{
+    width:100%;
+    max-width:520px;
+    min-height:100vh;
+    background: var(--paper);
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+
+  /* ---------- Encabezado: placa acuñada + trama de seguridad ---------- */
+  .app-header{
+    position:relative;
+    padding: 24px 22px 18px;
+    display:flex;
+    align-items:center;
+    gap:15px;
+    overflow:hidden;
+    border-bottom: 1px solid var(--line);
+  }
+  .app-header::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image: repeating-linear-gradient(115deg, var(--gold) 0 1px, transparent 1px 13px);
+    opacity:.08;
+    pointer-events:none;
+  }
+  .app-header::after{
+    content:"";
+    position:absolute; left:22px; right:22px; bottom:0; height:1px;
+    background: var(--line);
+    box-shadow: 0 3px 0 -2px var(--line);
+    opacity:.7;
+  }
+  .brand-mark{
+    position:relative; z-index:1;
+    width:54px;height:54px;flex:0 0 54px;
+    border-radius:50%;
+    background: radial-gradient(circle at 34% 28%, var(--gold-bright), var(--gold) 55%, var(--gold-deep) 100%);
+    border: 2px solid var(--gold-deep);
+    box-shadow: inset 0 2px 3px rgba(255,255,255,.55), inset 0 -3px 6px rgba(0,0,0,.25), 0 3px 9px -2px rgba(139,100,32,.5);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:19px;
+    text-shadow: 0 1px 1px rgba(0,0,0,.35);
+  }
+  .brand-text{ position:relative; z-index:1; }
+  .brand-text h1{ font-size: 22px; font-weight:700; color:var(--ink); letter-spacing:-.01em; }
+  .brand-text p{ margin:3px 0 0; font-size:12.5px; color:var(--ink-soft); }
+
+  main.screen{
+    flex:1;
+    padding: 18px 20px 100px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    animation: subir .32s ease both;
+  }
+  @keyframes subir{ from{ opacity:0; transform:translateY(6px);} to{ opacity:1; transform:none;} }
+
+  .card{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    box-shadow: var(--shadow-card);
+  }
+  .eyebrow{
+    font-size:11.5px;
+    font-weight:700;
+    letter-spacing:.09em;
+    text-transform:uppercase;
+    color: var(--gold-deep);
+  }
+
+  /* ---------- Formularios ---------- */
+  .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+  .field label{ font-size:13px; font-weight:600; color:var(--ink-soft); }
+  .field input, .field select{
+    font-family:'Work Sans',sans-serif;
+    font-size:16px;
+    padding:12px 14px;
+    border-radius: var(--radius-sm);
+    border:1.5px solid var(--line);
+    background: var(--paper);
+    color:var(--ink);
+    outline:none;
+  }
+  .field input:focus, .field select:focus, button:focus-visible, .opcion-btn:focus-visible, .combo-btn:focus-visible{
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px var(--gold-light);
+  }
+  .field-hint{ font-size:12px; color:var(--ink-faint); margin-top:10px; line-height:1.5;}
+
+  .segmented{
+    display:flex;
+    border-radius: 999px;
+    background: var(--gold-light);
+    padding:4px;
+    gap:4px;
+  }
+  .segmented button{
+    flex:1;
+    border:none;
+    background:transparent;
+    padding:10px 8px;
+    font-family:'Work Sans',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    color: var(--gold-deep);
+    border-radius:999px;
+    cursor:pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  .segmented button.activo{
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  button{ cursor:pointer; font-family:'Work Sans',sans-serif; }
+  .btn{
+    width:100%;
+    padding:15px 18px;
+    border-radius: 999px;
+    border:none;
+    font-size:16px;
+    font-weight:700;
+    transition: transform .08s ease, filter .15s ease;
+  }
+  .btn:active{ transform: scale(0.98); }
+  .btn-primary{
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold) 65%, var(--gold-deep));
+    color:#2B1E05;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 6px 14px -6px rgba(139,100,32,.5);
+  }
+  .btn-primary:hover{ filter:brightness(1.04); }
+  .btn-secondary{ background: var(--card); color:var(--ink); border:1.5px solid var(--line); }
+  .btn:disabled{ opacity:.5; cursor:not-allowed; filter:none; }
+
+  /* ---------- Niveles ---------- */
+  .niveles-grid{ display:flex; flex-direction:column; gap:12px; }
+  .nivel-card{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background: var(--card);
+    border:1px solid var(--line);
+    border-radius: var(--radius-md);
+    padding:14px 16px 14px 20px;
+    text-align:left;
+    width:100%;
+    box-shadow: var(--shadow-card);
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  }
+  .nivel-card::before{
+    content:"";
+    position:absolute; left:0; top:10px; bottom:10px; width:5px;
+    border-radius:0 4px 4px 0;
+    background: var(--nivel-color, var(--gold));
+  }
+  .nivel-card:hover{ border-color: var(--gold); transform: translateY(-1px); box-shadow: var(--shadow-lift); }
+  .nivel-icono{ flex:0 0 auto; width:64px; display:flex; align-items:center; justify-content:center; }
+  .icono-row{ display:flex; }
+  .icono-pieza{ width:34px; margin-right:-10px; }
+  .icono-row .icono-pieza svg{ width:100%; display:block; filter: drop-shadow(0 2px 2px rgba(0,0,0,.16)); }
+  .icono-percent{
+    font-family:'Fraunces',serif; font-size:28px; font-weight:800; color: var(--gold-deep);
+    width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background: var(--gold-light);
+  }
+  .nivel-texto{ flex:1; min-width:0; }
+  .nivel-badge{
+    display:inline-block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.03em;
+    color: var(--gold-deep);
+    background: var(--gold-light);
+    padding:2px 9px;
+    border-radius:999px;
+    margin-bottom:6px;
+  }
+  .nivel-texto h3{ font-size:17px; font-weight:600; }
+  .nivel-texto p{ margin:3px 0 0; font-size:13px; color:var(--ink-soft); }
+
+  /* ---------- Juego ---------- */
+  .game-top{ display:flex; align-items:center; justify-content:space-between; }
+  .corazones{ display:flex; gap:4px; }
+  .racha-badge{
+    display:flex; align-items:center; gap:6px; font-weight:700; font-size:13.5px; color: var(--gold-deep);
+    background: var(--gold-light); padding:5px 10px 5px 6px; border-radius:999px;
+  }
+  .racha-badge .pieza-mini{ width:20px; }
+  .racha-badge .pieza-mini svg{ width:100%; display:block; }
+
+  .timerbar{
+    height:9px; border-radius:999px; overflow:hidden; margin:16px 0 4px;
+    background: repeating-linear-gradient(90deg, var(--line-soft) 0 7px, var(--line) 7px 8px);
+    border:1px solid var(--line);
+  }
+  .timerbar-fill{ height:100%; background: var(--gold); border-radius:999px; transition: width .1s linear, background .2s; }
+
+  .nivel-tag{ font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; letter-spacing:.02em; color:var(--ink-faint); margin-bottom:3px; }
+  .nivel-titulo{ font-size:19px; font-weight:600; margin-bottom:14px; }
+
+  .pregunta-enunciado{ font-size:17px; line-height:1.45; margin-bottom:16px; }
+
+  .pregunta-visual{
+    display:flex; gap:14px; justify-content:center; align-items:center; flex-wrap:wrap;
+    margin-bottom:18px; padding:18px 10px;
+    background: radial-gradient(ellipse at center, var(--gold-light) 0%, transparent 72%);
+    border-radius: var(--radius-md);
+  }
+  .pieza-svg{ width:96px; }
+  .pieza-svg.pieza-moneda{ width:74px; }
+
+  .opciones-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+  .opcion-btn{
+    background: var(--card);
+    border:1.5px solid var(--line);
+    border-radius: var(--radius-md);
+    padding:14px 10px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:15px;
+    font-weight:600;
+    color: var(--ink);
+    text-align:center;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.5);
+    transition: border-color .12s ease, transform .08s ease;
+  }
+  .opcion-btn:not(:disabled):hover{ border-color: var(--gold); }
+  .opcion-btn.correcta{ background: var(--correct-bg); border-color: var(--correct); color: var(--correct); }
+  .opcion-btn.incorrecta{ background: var(--wrong-bg); border-color: var(--wrong); color: var(--wrong); }
+  .opcion-btn:disabled{ cursor:default; }
+
+  .combo-list{ display:flex; flex-direction:column; gap:10px; }
+  .combo-btn{
+    display:flex; align-items:center; gap:10px;
+    background: var(--card); border:1.5px solid var(--line); border-radius: var(--radius-md);
+    padding:10px 12px; width:100%; text-align:left;
+    transition: border-color .12s ease;
+  }
+  .combo-btn:not(:disabled):hover{ border-color: var(--gold); }
+  .combo-piezas{ display:flex; flex:1; flex-wrap:wrap; gap:2px; }
+  .combo-piezas .pieza-mini{ width:30px; margin-right:-8px; }
+  .combo-piezas .pieza-mini svg{ width:100%; display:block; }
+  .combo-count{ font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; color: var(--ink-soft); white-space:nowrap; }
+  .combo-btn.correcta{ background: var(--correct-bg); border-color: var(--correct); }
+  .combo-btn.incorrecta{ background: var(--wrong-bg); border-color: var(--wrong); }
+  .combo-btn.correcta .combo-count{ color: var(--correct); }
+  .combo-btn.incorrecta .combo-count{ color: var(--wrong); }
+
+  /* ---------- Resultado: boleta ---------- */
+  .boleta{
+    position:relative;
+    text-align:center;
+    padding: 30px 22px 24px;
+    background: var(--card);
+    border:1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    background-image:
+      radial-gradient(circle 7px at 0 100%, transparent 6px, var(--card) 7px),
+      radial-gradient(circle 7px at 100% 100%, transparent 6px, var(--card) 7px);
+  }
+  .boleta::before{
+    content:"";
+    position:absolute; left:16px; right:16px; bottom:10px; height:0;
+    border-bottom: 1.5px dashed var(--line);
+  }
+  .resultado-titulo{ font-size:22px; font-weight:700; margin-bottom:4px; }
+  .resultado-sub{ color:var(--ink-soft); font-size:13.5px; margin-bottom:20px; font-family:'IBM Plex Mono',monospace; }
+  .puntaje-grande{ font-family:'IBM Plex Mono',monospace; font-size:52px; font-weight:700; color:var(--ink); letter-spacing:-.01em; }
+  .puntaje-label{ font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:22px; }
+  .resultado-stats{ display:flex; justify-content:center; gap:10px; margin-bottom:24px; }
+  .resultado-stat{ flex:1; max-width:140px; background:var(--gold-light); border-radius:var(--radius-sm); padding:10px 6px; }
+  .resultado-stat b{ display:block; font-size:19px; font-family:'IBM Plex Mono',monospace; color:var(--gold-deep); }
+  .resultado-stat span{ font-size:11.5px; color:var(--ink-soft); }
+  .resultado-acciones{ display:flex; flex-direction:column; gap:10px; margin-top:6px; }
+
+  /* ---------- Ranking ---------- */
+  .ranking-header{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:2px; }
+  .ranking-semana{ font-size:12.5px; color:var(--ink-faint); margin-bottom:16px; font-family:'IBM Plex Mono',monospace; }
+
+  .podio{ display:flex; align-items:flex-end; justify-content:center; gap:8px; margin-bottom:22px; }
+  .podio-puesto{ flex:1; max-width:150px; display:flex; flex-direction:column; align-items:center; text-align:center; }
+  .medalla{
+    width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; font-weight:800; font-size:17px; color:#fff;
+    box-shadow: inset 0 2px 3px rgba(255,255,255,.5), inset 0 -3px 5px rgba(0,0,0,.22), 0 3px 8px -2px rgba(0,0,0,.35);
+    margin-bottom:8px;
+  }
+  .puesto-1 .medalla{ background: radial-gradient(circle at 35% 28%, var(--gold-bright), var(--gold) 55%, var(--gold-deep)); width:54px; height:54px; font-size:20px; }
+  .puesto-2 .medalla{ background: radial-gradient(circle at 35% 28%, #E7EBF0, var(--silver) 55%, #7C8493); }
+  .puesto-3 .medalla{ background: radial-gradient(circle at 35% 28%, #E3B889, var(--bronze) 55%, #7C4E28); }
+  .podio-nombre{ font-weight:600; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+  .podio-puntaje{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:14px; color:var(--gold-deep); }
+  .podio-base{ margin-top:8px; width:100%; border-radius:8px 8px 0 0; background: var(--gold-light); }
+  .puesto-1 .podio-base{ height:46px; }
+  .puesto-2 .podio-base{ height:30px; }
+  .puesto-3 .podio-base{ height:20px; }
+
+  .ranking-row{
+    display:flex; align-items:center; gap:12px;
+    padding:11px 4px;
+    border-bottom:1px solid var(--line-soft);
+  }
+  .ranking-row:last-child{ border-bottom:none; }
+  .rank-num{ width:24px; text-align:center; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:14px; color: var(--ink-faint); flex:0 0 24px; }
+  .rank-info{ flex:1; min-width:0; }
+  .rank-nombre{ font-weight:600; font-size:14.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rank-meta{ font-size:12px; color:var(--ink-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rank-puntaje{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:15px; color: var(--ink); flex:0 0 auto; }
+
+  .estado-vacio, .estado-cargando{ text-align:center; padding:34px 10px; color:var(--ink-soft); font-size:14px; }
+  .estado-icono{ margin:0 auto 12px; width:40px; }
+  .estado-icono svg{ width:100%; display:block; }
+  .estado-cargando .estado-icono{ animation: girar 1.1s linear infinite; }
+  @keyframes girar{ to{ transform: rotate(360deg); } }
+
+  .tabbar{
+    position:sticky; bottom:0;
+    display:flex;
+    background: var(--paper);
+    border-top:1px solid var(--line);
+    padding: 8px 20px calc(8px + env(safe-area-inset-bottom));
+    gap:6px;
+  }
+  .tab{
+    flex:1;
+    background:none; border:none;
+    padding:9px 4px;
+    font-size:13px; font-weight:600;
+    color: var(--ink-faint);
+    border-radius: var(--radius-sm);
+    transition: background .12s ease, color .12s ease;
+  }
+  .tab.activo{ color: var(--gold-deep); background: var(--gold-light); }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; animation:none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="app-header">
+    <div class="brand-mark">S/</div>
+    <div class="brand-text">
+      <h1>Cuenta tus Soles</h1>
+      <p>Matemática con billetes y monedas del Perú</p>
+    </div>
+  </header>
+  <main id="screen" class="screen"></main>
+  <nav class="tabbar">
+    <button class="tab" data-tab="jugar">Jugar</button>
+    <button class="tab" data-tab="ranking">Ranking semanal</button>
+  </nav>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- Datos base ---------------- */
+  var BILLETES = [10,20,50,100,200];
+  var MONEDAS = [0.10,0.20,0.50,1,2,5];
+  var COLOR_BILLETE = {10:'#7B4FA0',20:'#D9702E',50:'#B5342F',100:'#1F7A66',200:'#4C7A32'};
+  var COLOR_BILLETE_DEEP = {10:'#573773',20:'#A5521A',50:'#832722',100:'#155947',200:'#33501C'};
+
+  var ARTICULOS = [
+    {nombre:'un cuaderno', precio:6.50},
+    {nombre:'una lonchera', precio:15.00},
+    {nombre:'un lápiz', precio:1.20},
+    {nombre:'una gaseosa', precio:3.50},
+    {nombre:'una empanada', precio:4.00},
+    {nombre:'una caja de colores', precio:12.90},
+    {nombre:'una mochila pequeña', precio:38.00},
+    {nombre:'un libro de cuentos', precio:22.50},
+    {nombre:'una regla', precio:2.00},
+    {nombre:'un helado', precio:5.00},
+    {nombre:'un jugo', precio:2.50},
+    {nombre:'un sánguche', precio:6.00}
+  ];
+
+  var PRODUCTOS = [
+    {nombre:'una casaca', precio:89},
+    {nombre:'unas zapatillas', precio:120},
+    {nombre:'una mochila', precio:75},
+    {nombre:'un libro', precio:45},
+    {nombre:'un reloj', precio:60},
+    {nombre:'una lonchera', precio:35},
+    {nombre:'unos audífonos', precio:98}
+  ];
+  var DESCUENTOS = [10,15,20,25,30,50];
+
+  var REGIONES = ['Amazonas','Áncash','Apurímac','Arequipa','Ayacucho','Cajamarca','Callao','Cusco',
+    'Huancavelica','Huánuco','Ica','Junín','La Libertad','Lambayeque','Lima','Loreto','Madre de Dios',
+    'Moquegua','Pasco','Piura','Puno','San Martín','Tacna','Tumbes','Ucayali'];
+
+  var TOTAL_PREGUNTAS = 10;
+  var CORAZONES_INICIALES = 3;
+
+  /* ---------------- Utilidades ---------------- */
+  function shuffle(arr){
+    for(var i=arr.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t = arr[i]; arr[i]=arr[j]; arr[j]=t;
+    }
+    return arr;
+  }
+  function elegir(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+  function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+  function formatMoney(centimos){
+    return 'S/ ' + (centimos/100).toFixed(2);
+  }
+  function formatDenom(valor){
+    if (valor < 1) return Math.round(valor*100) + ' cént.';
+    return 'S/ ' + valor;
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  function generarOpciones(correctoCentimos, unidad){
+    var mult = [1,2,3,5,8,10,15,20];
+    var valores = {};
+    valores[correctoCentimos] = true;
+    var intentos = 0;
+    while (Object.keys(valores).length < 4 && intentos < 200){
+      intentos++;
+      var signo = Math.random() < 0.5 ? -1 : 1;
+      var delta = elegir(mult) * unidad;
+      var val = correctoCentimos + signo*delta;
+      if (val > 0 && !valores[val]) valores[val] = true;
+    }
+    var arr = Object.keys(valores).map(Number);
+    shuffle(arr);
+    return arr.map(function(v){
+      return { label: formatMoney(v), value:v, correcta: v === correctoCentimos };
+    });
+  }
+
+  /* ---------------- Piezas visuales ----------------
+     SVG estilizado y de fantasía — no reproduce el diseño real de los
+     billetes y monedas peruanos. El motivo de "rayos de sol" evoca el
+     nombre de nuestra moneda (el Sol) sin copiar la iconografía oficial. */
+  var svgUid = 0;
+
+  function rayosSVG(cx, cy, r, n, color, opacidad){
+    var html = '';
+    for (var i=0;i<n;i++){
+      var ang = (Math.PI*2/n) * i;
+      var largo = (i % 2 === 0) ? r*1.18 : r*0.92;
+      var x1 = cx + Math.cos(ang)*r*0.55, y1 = cy + Math.sin(ang)*r*0.55;
+      var x2 = cx + Math.cos(ang)*largo,  y2 = cy + Math.sin(ang)*largo;
+      html += '<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="'+color+'" stroke-width="1.4" opacity="'+opacidad+'" stroke-linecap="round"/>';
+    }
+    return html;
+  }
+
+  function billeteSVG(valor){
+    var id = 'bg' + (svgUid++);
+    var color = COLOR_BILLETE[valor] || '#7B4FA0';
+    var deep = COLOR_BILLETE_DEEP[valor] || '#573773';
+    return '<svg viewBox="0 0 220 110" class="pieza-svg" role="img" aria-label="Billete fantasía de ' + valor + ' soles">' +
+      '<defs><linearGradient id="' + id + '" x1="0" y1="0" x2="220" y2="110">' +
+        '<stop offset="0" stop-color="' + color + '"/><stop offset="1" stop-color="' + deep + '"/>' +
+      '</linearGradient></defs>' +
+      '<rect x="2.5" y="2.5" width="215" height="105" rx="16" fill="url(#' + id + ')" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/>' +
+      '<rect x="9" y="9" width="202" height="92" rx="11" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="1" stroke-dasharray="2 3"/>' +
+      rayosSVG(178, 55, 24, 16, '#fff', 0.16) +
+      '<circle cx="178" cy="55" r="17" fill="rgba(255,255,255,.14)" stroke="rgba(255,255,255,.3)" stroke-width="1"/>' +
+      '<text x="20" y="42" fill="#fff" font-family="Fraunces, serif" font-size="17" font-weight="600" opacity=".92">S/</text>' +
+      '<text x="20" y="83" fill="#fff" font-family="Fraunces, serif" font-size="36" font-weight="800" style="text-shadow:0 1px 2px rgba(0,0,0,.25)">' + valor + '</text>' +
+      '<text x="178" y="60" fill="#fff" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600">' + valor + '</text>' +
+      '</svg>';
+  }
+  function monedaSVG(valor){
+    var id = 'mc' + (svgUid++);
+    var dorada = valor >= 1;
+    var c1 = dorada ? '#E7CE8E' : '#DDE1E6';
+    var c2 = dorada ? '#B8892B' : '#9AA3AC';
+    var c3 = dorada ? '#8B6420' : '#767E88';
+    var label = valor < 1 ? Math.round(valor*100) + '¢' : ('S/' + valor);
+    return '<svg viewBox="0 0 110 110" class="pieza-svg pieza-moneda" role="img" aria-label="Moneda fantasía de ' + label + '">' +
+      '<defs><radialGradient id="' + id + '" cx="35%" cy="30%" r="75%">' +
+        '<stop offset="0" stop-color="' + c1 + '"/><stop offset="1" stop-color="' + c2 + '"/>' +
+      '</radialGradient></defs>' +
+      '<circle cx="55" cy="55" r="50" fill="url(#' + id + ')" stroke="' + c3 + '" stroke-width="3"/>' +
+      '<circle cx="55" cy="55" r="50" fill="none" stroke="#fff" stroke-width="1" opacity=".35"/>' +
+      '<circle cx="55" cy="55" r="41" fill="none" stroke="' + c3 + '" stroke-width="1.2" stroke-dasharray="1.5 3" opacity=".6"/>' +
+      rayosSVG(55, 55, 30, 12, c3, 0.22) +
+      '<text x="55" y="63" text-anchor="middle" fill="' + c3 + '" font-family="Fraunces, serif" font-size="19" font-weight="800">' + label + '</text>' +
+      '</svg>';
+  }
+  function piezaSVG(valor){
+    return BILLETES.indexOf(valor) !== -1 ? billeteSVG(valor) : monedaSVG(valor);
+  }
+  function heartSVG(lleno){
+    var color = lleno ? 'var(--wrong)' : 'var(--line)';
+    return '<svg width="19" height="17" viewBox="0 0 20 18" aria-hidden="true">' +
+      '<path d="M10 17 C10 17 1 11 1 5.5 C1 2.5 3.5 0.5 6 0.5 C8 0.5 9.5 1.8 10 3 C10.5 1.8 12 0.5 14 0.5 C16.5 0.5 19 2.5 19 5.5 C19 11 10 17 10 17 Z" fill="' + color + '"/>' +
+      '</svg>';
+  }
+  function miniIconRow(valores){
+    var html = '<div class="icono-row">';
+    valores.forEach(function(v){ html += '<div class="icono-pieza">' + piezaSVG(v) + '</div>'; });
+    html += '</div>';
+    return html;
+  }
+  function monedaSpinnerSVG(){
+    return '<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="none" stroke="var(--line)" stroke-width="4"/>' +
+      '<path d="M20 4 A16 16 0 0 1 36 20" fill="none" stroke="var(--gold)" stroke-width="4" stroke-linecap="round"/></svg>';
+  }
+  function cofreVacioSVG(){
+    return '<svg viewBox="0 0 40 40"><rect x="6" y="16" width="28" height="18" rx="3" fill="none" stroke="var(--line)" stroke-width="2.5"/>' +
+      '<path d="M6 16 L11 7 H29 L34 16" fill="none" stroke="var(--line)" stroke-width="2.5" stroke-linejoin="round"/>' +
+      '<circle cx="20" cy="24" r="2.6" fill="var(--gold)"/></svg>';
+  }
+
+  /* ---------------- Generadores de preguntas ---------------- */
+  function generarPreguntaReconoce(){
+    var esBillete = Math.random() < 0.5;
+    var pool = esBillete ? BILLETES : MONEDAS;
+    var valor = elegir(pool);
+    var distractores = shuffle(pool.filter(function(v){ return v !== valor; })).slice(0,3);
+    var valoresOpciones = shuffle([valor].concat(distractores));
+    return {
+      enunciado: '¿Cuánto vale ' + (esBillete ? 'este billete' : 'esta moneda') + '?',
+      visual: [valor],
+      opciones: valoresOpciones.map(function(v){
+        return { label: formatDenom(v), value:v, correcta: v === valor };
+      })
+    };
+  }
+
+  function generarPreguntaSuma(){
+    var pool = [0.10,0.20,0.50,1,2,5,10,20];
+    var cantidad = Math.random() < 0.5 ? 2 : 3;
+    var piezas = [];
+    for (var i=0;i<cantidad;i++){ piezas.push(elegir(pool)); }
+    var totalCentimos = Math.round(piezas.reduce(function(a,b){return a+b;},0) * 100);
+    return {
+      enunciado: '¿Cuánto dinero hay en total?',
+      visual: piezas,
+      opciones: generarOpciones(totalCentimos, 10)
+    };
+  }
+
+  function generarPreguntaVueltoSimple(){
+    var articulo = elegir(ARTICULOS);
+    var precioCentimos = Math.round(articulo.precio * 100);
+    var billetesValidos = BILLETES.filter(function(b){ return b*100 > precioCentimos; });
+    var billete = billetesValidos.length ? elegir(billetesValidos) : 20;
+    var vueltoCentimos = billete*100 - precioCentimos;
+    return {
+      enunciado: 'Compras ' + articulo.nombre + ' que cuesta ' + formatMoney(precioCentimos) + '. Pagas con un billete de S/ ' + billete + '. ¿Cuánto es tu vuelto?',
+      visual: [billete],
+      opciones: generarOpciones(vueltoCentimos, 10)
+    };
+  }
+
+  var DENOMS_SOLES = [200,100,50,20,10,5,2,1];
+  var SPLIT_MAP = {200:[100,100],100:[50,50],50:[20,20,10],20:[10,10],10:[5,5],5:[2,2,1],2:[1,1]};
+
+  function greedyCombo(soles){
+    var resto = soles, piezas = [];
+    DENOMS_SOLES.forEach(function(d){
+      while (resto >= d){ piezas.push(d); resto -= d; }
+    });
+    return piezas;
+  }
+  function splitOnce(piezas){
+    var candidatos = [];
+    piezas.forEach(function(p,i){ if (SPLIT_MAP[p]) candidatos.push(i); });
+    if (!candidatos.length) return piezas.slice();
+    var idx = elegir(candidatos);
+    var nuevas = piezas.slice();
+    var reemplazo = SPLIT_MAP[nuevas[idx]];
+    nuevas.splice.apply(nuevas, [idx,1].concat(reemplazo));
+    return nuevas;
+  }
+  function comboKey(piezas){ return piezas.slice().sort(function(a,b){return a-b;}).join('-') + '|' + piezas.length; }
+
+  function generarPreguntaCombina(){
+    var montoSoles = 12 + Math.floor(Math.random()*180);
+    var correcta = greedyCombo(montoSoles);
+    var vistos = {}; vistos[comboKey(correcta)] = true;
+    var alternativas = [];
+    var base = correcta;
+    var intentosTotales = 0;
+    while (alternativas.length < 3 && intentosTotales < 40){
+      intentosTotales++;
+      base = splitOnce(base.length > correcta.length ? base : correcta);
+      var k = comboKey(base);
+      if (!vistos[k] && base.length > correcta.length){
+        vistos[k] = true;
+        alternativas.push(base.slice());
+      }
+      if (intentosTotales % 8 === 0) base = correcta;
+    }
+    while (alternativas.length < 3){
+      alternativas.push(splitOnce(correcta).length > correcta.length ? splitOnce(correcta) : correcta.concat([]));
+    }
+    var combos = shuffle([
+      { piezas: correcta, correcta: true },
+      { piezas: alternativas[0], correcta: false },
+      { piezas: alternativas[1], correcta: false },
+      { piezas: alternativas[2], correcta: false }
+    ]);
+    return {
+      enunciado: 'Quieres pagar exactamente S/ ' + montoSoles + '. ¿Cuál combinación usa la menor cantidad de billetes y monedas?',
+      combos: combos
+    };
+  }
+
+  function generarPreguntaVueltoComplejo(){
+    var cantidad = Math.random() < 0.5 ? 2 : 3;
+    var copia = shuffle(ARTICULOS.slice());
+    var elegidos = copia.slice(0, cantidad);
+    var sumaCentimos = elegidos.reduce(function(a,art){ return a + Math.round(art.precio*100); }, 0);
+    var billetesValidos = BILLETES.filter(function(b){ return b*100 > sumaCentimos; });
+    var billete = billetesValidos.length ? elegir(billetesValidos) : 200;
+    var vueltoCentimos = billete*100 - sumaCentimos;
+    var listaTexto = elegidos.map(function(a){ return a.nombre + ' (' + formatMoney(Math.round(a.precio*100)) + ')'; }).join(', ');
+    return {
+      enunciado: 'Compras ' + listaTexto + '. Pagas con un billete de S/ ' + billete + '. ¿Cuánto es tu vuelto?',
+      visual: [billete],
+      opciones: generarOpciones(vueltoCentimos, 10)
+    };
+  }
+
+  function generarPreguntaDescuento(){
+    var producto = elegir(PRODUCTOS);
+    var descuento = elegir(DESCUENTOS);
+    var precioCentimos = producto.precio*100;
+    var ahorroCentimos = Math.round(precioCentimos * descuento / 100);
+    var finalCentimos = precioCentimos - ahorroCentimos;
+    var preguntarAhorro = Math.random() < 0.5;
+    var objetivo = preguntarAhorro ? ahorroCentimos : finalCentimos;
+    return {
+      enunciado: capitalize(producto.nombre) + ' cuesta ' + formatMoney(precioCentimos) + ' y tiene un descuento del ' + descuento + '%. ¿Cuánto ' + (preguntarAhorro ? 'ahorras' : 'pagas') + '?',
+      opciones: generarOpciones(objetivo, 50)
+    };
+  }
+
+  var NIVELES = {
+    primaria: [
+      { id:1, nombre:'Reconoce', desc:'Identifica el valor de billetes y monedas', gen: generarPreguntaReconoce, tiempo:16, icono: miniIconRow([20,1]), color:'#D9702E' },
+      { id:2, nombre:'Suma sencilla', desc:'Suma billetes y monedas', gen: generarPreguntaSuma, tiempo:18, icono: miniIconRow([0.5,0.5,1]), color:'#B8892B' },
+      { id:3, nombre:'El vuelto', desc:'Calcula el vuelto de una compra', gen: generarPreguntaVueltoSimple, tiempo:22, icono: miniIconRow([10]), color:'#7B4FA0' }
+    ],
+    secundaria: [
+      { id:4, nombre:'Combina', desc:'Paga con la menor cantidad de piezas', gen: generarPreguntaCombina, tiempo:25, icono: miniIconRow([50,10]), color:'#B5342F' },
+      { id:5, nombre:'Vuelto exacto', desc:'Calcula el vuelto de compras múltiples', gen: generarPreguntaVueltoComplejo, tiempo:26, icono: miniIconRow([100,5]), color:'#1F7A66' },
+      { id:6, nombre:'Descuentos', desc:'Aplica porcentajes sobre un precio', gen: generarPreguntaDescuento, tiempo:22, icono: '<div class="icono-percent">%</div>', color:'#4C7A32' }
+    ]
+  };
+
+  /* ---------------- Semana ISO (para el ranking) ---------------- */
+  function getISOWeekInfo(date){
+    var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    var dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    var weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    var monday = new Date(d); monday.setUTCDate(d.getUTCDate() - 3);
+    var sunday = new Date(monday); sunday.setUTCDate(monday.getUTCDate() + 6);
+    var meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    var rango = monday.getUTCDate() + ' ' + meses[monday.getUTCMonth()] + ' – ' + sunday.getUTCDate() + ' ' + meses[sunday.getUTCMonth()];
+    return { key: d.getUTCFullYear() + '-W' + String(weekNo).padStart(2,'0'), rango: rango };
+  }
+
+  /* ---------------- Almacenamiento (ranking compartido) ---------------- */
+  function storageDisponible(){ return typeof window.storage !== 'undefined' && window.storage; }
+
+  function guardarEnRanking(entrada, categoria){
+    var semana = getISOWeekInfo(new Date());
+    var key = 'leaderboard:' + semana.key + ':' + categoria;
+    if (!storageDisponible()) return Promise.resolve(false);
+    return window.storage.get(key, true).catch(function(){ return null; }).then(function(res){
+      var lista = [];
+      try{ if (res && res.value) lista = JSON.parse(res.value); }catch(e){ lista = []; }
+      lista.push(entrada);
+      lista.sort(function(a,b){ return b.puntaje - a.puntaje; });
+      lista = lista.slice(0,50);
+      return window.storage.set(key, JSON.stringify(lista), true).then(function(){ return true; });
+    }).catch(function(){ return false; });
+  }
+
+  function cargarRanking(categoria){
+    var semana = getISOWeekInfo(new Date());
+    var key = 'leaderboard:' + semana.key + ':' + categoria;
+    if (!storageDisponible()) return Promise.resolve({ lista: [], rango: semana.rango });
+    return window.storage.get(key, true).catch(function(){ return null; }).then(function(res){
+      var lista = [];
+      try{ if (res && res.value) lista = JSON.parse(res.value); }catch(e){ lista = []; }
+      return { lista: lista, rango: semana.rango };
+    });
+  }
+
+  /* ---------------- Estado de la app ---------------- */
+  var state = {
+    screen: 'niveles',
+    player: null,
+    categoria: 'primaria',
+    nivelActual: null,
+    preguntaIndex: 0,
+    pregunta: null,
+    corazones: CORAZONES_INICIALES,
+    racha: 0,
+    mejorRacha: 0,
+    puntaje: 0,
+    aciertos: 0,
+    tiempoTotal: 0,
+    tiempoRestante: 0,
+    timerId: null,
+    respondida: false,
+    guardando: false,
+    guardado: false,
+    rankingCategoria: 'primaria'
+  };
+
+  var screenEl = document.getElementById('screen');
+
+  function ir(pantalla){
+    if (state.timerId){ clearInterval(state.timerId); state.timerId = null; }
+    state.screen = pantalla;
+    render();
+  }
+
+  /* ---------------- Render principal ---------------- */
+  function render(){
+    document.querySelectorAll('.tab').forEach(function(t){
+      var activo = (t.dataset.tab === 'jugar' && state.screen !== 'ranking') ||
+                   (t.dataset.tab === 'ranking' && state.screen === 'ranking');
+      t.classList.toggle('activo', activo);
+    });
+
+    if (state.screen === 'niveles') return renderNiveles();
+    if (state.screen === 'juego') return renderJuego();
+    if (state.screen === 'resultado') return renderResultado();
+    if (state.screen === 'ranking') return renderRanking();
+  }
+
+  function renderNiveles(){
+    var niveles = NIVELES[state.categoria];
+    screenEl.innerHTML =
+      '<div class="segmented" id="seg-categoria-niveles">' +
+        '<button data-val="primaria" class="' + (state.categoria==='primaria'?'activo':'') + '">Primaria</button>' +
+        '<button data-val="secundaria" class="' + (state.categoria==='secundaria'?'activo':'') + '">Secundaria</button>' +
+      '</div>' +
+      '<div class="niveles-grid" id="niveles-grid"></div>';
+
+    var seg = screenEl.querySelectorAll('#seg-categoria-niveles button');
+    seg.forEach(function(b){
+      b.addEventListener('click', function(){
+        state.categoria = b.dataset.val;
+        renderNiveles();
+      });
+    });
+
+    var grid = screenEl.querySelector('#niveles-grid');
+    niveles.forEach(function(nivel){
+      var card = document.createElement('button');
+      card.className = 'nivel-card';
+      card.style.setProperty('--nivel-color', nivel.color);
+      card.innerHTML =
+        '<div class="nivel-icono">' + nivel.icono + '</div>' +
+        '<div class="nivel-texto">' +
+          '<span class="nivel-badge">NIVEL ' + nivel.id + '</span>' +
+          '<h3>' + nivel.nombre + '</h3>' +
+          '<p>' + nivel.desc + '</p>' +
+        '</div>';
+      card.addEventListener('click', function(){ iniciarNivel(nivel); });
+      grid.appendChild(card);
+    });
+  }
+
+  function iniciarNivel(nivel){
+    if (state.timerId){ clearInterval(state.timerId); state.timerId = null; }
+    state.nivelActual = nivel;
+    state.preguntaIndex = 0;
+    state.corazones = CORAZONES_INICIALES;
+    state.racha = 0;
+    state.mejorRacha = 0;
+    state.puntaje = 0;
+    state.aciertos = 0;
+    state.guardado = false;
+    state.screen = 'juego';
+    iniciarPregunta();
+  }
+
+  function iniciarPregunta(){
+    var nivel = state.nivelActual;
+    state.pregunta = nivel.gen();
+    state.respondida = false;
+    state.tiempoTotal = nivel.tiempo;
+    state.tiempoRestante = nivel.tiempo;
+    render();
+    if (state.timerId) clearInterval(state.timerId);
+    state.timerId = setInterval(function(){
+      state.tiempoRestante -= 0.1;
+      if (state.tiempoRestante <= 0){
+        state.tiempoRestante = 0;
+        actualizarTimerUI();
+        clearInterval(state.timerId);
+        state.timerId = null;
+        manejarRespuesta(-1, true);
+      } else {
+        actualizarTimerUI();
+      }
+    }, 100);
+  }
+
+  function actualizarTimerUI(){
+    var fill = document.getElementById('timer-fill');
+    if (!fill) return;
+    var pct = Math.max(0, (state.tiempoRestante / state.tiempoTotal) * 100);
+    fill.style.width = pct + '%';
+    fill.style.background = pct < 25 ? 'var(--wrong)' : 'var(--gold)';
+  }
+
+  function renderJuego(){
+    var nivel = state.nivelActual;
+    var p = state.pregunta;
+
+    var corazonesHtml = '';
+    for (var i=0;i<CORAZONES_INICIALES;i++){ corazonesHtml += heartSVG(i < state.corazones); }
+
+    var visualHtml = '';
+    if (p.visual){
+      visualHtml = '<div class="pregunta-visual">' + p.visual.map(function(v){ return piezaSVG(v); }).join('') + '</div>';
+    }
+
+    var opcionesHtml = '';
+    if (p.opciones){
+      opcionesHtml = '<div class="opciones-grid" id="opciones">' +
+        p.opciones.map(function(o,i){
+          return '<button class="opcion-btn" data-i="' + i + '">' + o.label + '</button>';
+        }).join('') +
+        '</div>';
+    } else if (p.combos){
+      opcionesHtml = '<div class="combo-list" id="opciones">' +
+        p.combos.map(function(c,i){
+          var piezasHtml = c.piezas.map(function(v){ return '<div class="pieza-mini">' + piezaSVG(v) + '</div>'; }).join('');
+          return '<button class="combo-btn" data-i="' + i + '">' +
+            '<div class="combo-piezas">' + piezasHtml + '</div>' +
+            '<span class="combo-count">' + c.piezas.length + ' piezas</span>' +
+          '</button>';
+        }).join('') +
+        '</div>';
+    }
+
+    screenEl.innerHTML =
+      '<div class="card">' +
+        '<div class="game-top">' +
+          '<div class="corazones">' + corazonesHtml + '</div>' +
+          '<div class="racha-badge"><div class="pieza-mini">' + monedaSVG(1) + '</div><span>Racha ' + state.racha + '</span></div>' +
+        '</div>' +
+        '<div class="timerbar"><div class="timerbar-fill" id="timer-fill" style="width:100%"></div></div>' +
+        '<p class="nivel-tag">NIVEL ' + nivel.id + ' · PREGUNTA ' + (state.preguntaIndex+1) + '/' + TOTAL_PREGUNTAS + '</p>' +
+        '<h3 class="nivel-titulo">' + nivel.nombre + '</h3>' +
+        visualHtml +
+        '<p class="pregunta-enunciado">' + p.enunciado + '</p>' +
+        opcionesHtml +
+      '</div>';
+
+    var botones = screenEl.querySelectorAll('#opciones button');
+    botones.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if (state.respondida) return;
+        clearInterval(state.timerId); state.timerId = null;
+        manejarRespuesta(parseInt(btn.dataset.i,10), false);
+      });
+    });
+  }
+
+  function manejarRespuesta(indiceElegido, porTiempo){
+    if (state.respondida) return;
+    state.respondida = true;
+    var p = state.pregunta;
+    var opciones = p.opciones || p.combos;
+    var correctaIdx = -1;
+    opciones.forEach(function(o,i){ if (o.correcta) correctaIdx = i; });
+    var acierto = !porTiempo && indiceElegido === correctaIdx;
+
+    var botones = screenEl.querySelectorAll('#opciones button');
+    botones.forEach(function(btn,i){
+      btn.disabled = true;
+      if (i === correctaIdx) btn.classList.add('correcta');
+      else if (i === indiceElegido) btn.classList.add('incorrecta');
+    });
+
+    if (acierto){
+      state.aciertos++;
+      state.racha++;
+      state.mejorRacha = Math.max(state.mejorRacha, state.racha);
+      var bonusVelocidad = Math.round((state.tiempoRestante / state.tiempoTotal) * 50);
+      var bonusRacha = state.racha >= 3 ? 20 : 0;
+      state.puntaje += 100 + bonusVelocidad + bonusRacha;
+    } else {
+      state.corazones--;
+      state.racha = 0;
+    }
+
+    setTimeout(function(){
+      state.preguntaIndex++;
+      if (state.preguntaIndex >= TOTAL_PREGUNTAS || state.corazones <= 0){
+        ir('resultado');
+      } else {
+        iniciarPregunta();
+      }
+    }, 1000);
+  }
+
+  function renderResultado(){
+    var nivel = state.nivelActual;
+
+    var accionesHtml = '<div class="resultado-acciones">' +
+      (state.guardado ? '<button class="btn btn-primary" id="btn-ver-ranking">Ver ranking</button>' : '') +
+      '<button class="btn btn-secondary" id="btn-repetir">Jugar de nuevo</button>' +
+    '</div>';
+
+    var formHtml = '';
+    if (state.guardado){
+      formHtml = '<div class="card" style="margin-top:14px;text-align:center;">' +
+        '<p style="font-size:14px;color:var(--correct);font-weight:600;margin:0;">Puntaje guardado en el ranking de ' + (state.categoria==='primaria'?'Primaria':'Secundaria') + ' ✓</p>' +
+      '</div>';
+    } else {
+      formHtml = '<div class="card" style="margin-top:14px;">' +
+        '<h3 style="font-size:15.5px;font-weight:600;margin-bottom:4px;">Guarda tu puntaje (opcional)</h3>' +
+        '<p style="font-size:13px;color:var(--ink-soft);margin:0 0 14px;">Regístrate para aparecer en el ranking semanal de ' + (state.categoria==='primaria'?'Primaria':'Secundaria') + '.</p>' +
+        '<div class="field">' +
+          '<label for="in-nombre">Nombre</label>' +
+          '<input id="in-nombre" type="text" maxlength="40" placeholder="¿Cómo te llamas?" value="' + (state.player ? escapeHtml(state.player.nombre) : '') + '">' +
+        '</div>' +
+        '<div class="field">' +
+          '<label for="in-colegio">Colegio (opcional)</label>' +
+          '<input id="in-colegio" type="text" maxlength="60" placeholder="Nombre de tu colegio" value="' + (state.player && state.player.colegio !== '—' ? escapeHtml(state.player.colegio) : '') + '">' +
+        '</div>' +
+        '<div class="field">' +
+          '<label for="in-region">Región</label>' +
+          '<select id="in-region">' +
+            '<option value="">Elige tu región</option>' +
+            REGIONES.map(function(r){
+              var sel = (state.player && state.player.region === r) ? ' selected' : '';
+              return '<option value="' + r + '"' + sel + '>' + r + '</option>';
+            }).join('') +
+          '</select>' +
+        '</div>' +
+        '<button class="btn btn-primary" id="btn-guardar">Guardar puntaje</button>' +
+        '<p class="field-hint">Tu nombre, colegio y región aparecerán en la tabla de posiciones semanal, visible para cualquiera que juegue.</p>' +
+      '</div>';
+    }
+
+    screenEl.innerHTML =
+      '<div class="boleta">' +
+        '<p class="eyebrow">' + (state.corazones <= 0 ? 'BOLETA DE PARTIDA' : 'BOLETA DE PARTIDA · APROBADA') + '</p>' +
+        '<p class="resultado-titulo">' + (state.corazones <= 0 ? 'Casi lo logras' : '¡Buen trabajo!') + '</p>' +
+        '<p class="resultado-sub">NIVEL ' + nivel.id + ' · ' + nivel.nombre.toUpperCase() + '</p>' +
+        '<div class="puntaje-grande tabular" id="puntaje-contador">0</div>' +
+        '<p class="puntaje-label">puntos</p>' +
+        '<div class="resultado-stats">' +
+          '<div class="resultado-stat"><b>' + state.aciertos + '/' + TOTAL_PREGUNTAS + '</b><span>aciertos</span></div>' +
+          '<div class="resultado-stat"><b>' + state.mejorRacha + '</b><span>mejor racha</span></div>' +
+        '</div>' +
+        accionesHtml +
+      '</div>' + formHtml;
+
+    // Animación de conteo — único momento de movimiento en la pantalla
+    var el = document.getElementById('puntaje-contador');
+    var destino = state.puntaje;
+    var inicio = null;
+    function paso(ts){
+      if (!inicio) inicio = ts;
+      var progreso = Math.min(1, (ts - inicio) / 700);
+      el.textContent = Math.round(destino * progreso);
+      if (progreso < 1) requestAnimationFrame(paso);
+    }
+    requestAnimationFrame(paso);
+
+    screenEl.querySelector('#btn-repetir').addEventListener('click', function(){ ir('niveles'); });
+
+    var btnVerRanking = screenEl.querySelector('#btn-ver-ranking');
+    if (btnVerRanking){
+      btnVerRanking.addEventListener('click', function(){
+        state.rankingCategoria = state.categoria;
+        ir('ranking');
+      });
+    }
+
+    var btnGuardar = screenEl.querySelector('#btn-guardar');
+    if (btnGuardar){
+      btnGuardar.addEventListener('click', function(){
+        var nombre = screenEl.querySelector('#in-nombre').value.trim();
+        var colegio = screenEl.querySelector('#in-colegio').value.trim();
+        var region = screenEl.querySelector('#in-region').value;
+        if (!nombre){ screenEl.querySelector('#in-nombre').focus(); return; }
+        if (!region){ screenEl.querySelector('#in-region').focus(); return; }
+        state.player = { nombre: nombre, colegio: colegio || '—', region: region };
+        btnGuardar.textContent = 'Guardando…';
+        btnGuardar.disabled = true;
+        var entrada = {
+          nombre: state.player.nombre,
+          colegio: state.player.colegio,
+          region: state.player.region,
+          puntaje: state.puntaje,
+          aciertos: state.aciertos,
+          fecha: new Date().toISOString()
+        };
+        guardarEnRanking(entrada, state.categoria).then(function(ok){
+          if (ok){
+            state.guardado = true;
+            renderResultado();
+          } else {
+            btnGuardar.disabled = false;
+            btnGuardar.textContent = 'No se pudo guardar, reintentar';
+          }
+        });
+      });
+    }
+  }
+
+  function renderRanking(){
+    screenEl.innerHTML =
+      '<div class="segmented" id="seg-ranking">' +
+        '<button data-val="primaria" class="' + (state.rankingCategoria==='primaria'?'activo':'') + '">Primaria</button>' +
+        '<button data-val="secundaria" class="' + (state.rankingCategoria==='secundaria'?'activo':'') + '">Secundaria</button>' +
+      '</div>' +
+      '<div class="card" id="ranking-card"><div class="estado-cargando"><div class="estado-icono">' + monedaSpinnerSVG() + '</div>Cargando el ranking…</div></div>';
+
+    var seg = screenEl.querySelectorAll('#seg-ranking button');
+    seg.forEach(function(b){
+      b.addEventListener('click', function(){
+        state.rankingCategoria = b.dataset.val;
+        renderRanking();
+      });
+    });
+
+    cargarYMostrarRanking();
+  }
+
+  function medallaHtml(entrada, puesto){
+    return '<div class="podio-puesto puesto-' + puesto + '">' +
+      '<div class="medalla">' + puesto + '</div>' +
+      '<div class="podio-nombre">' + escapeHtml(entrada.nombre) + '</div>' +
+      '<div class="podio-puntaje tabular">' + entrada.puntaje + '</div>' +
+      '<div class="podio-base"></div>' +
+    '</div>';
+  }
+
+  function cargarYMostrarRanking(){
+    var card = document.getElementById('ranking-card');
+    cargarRanking(state.rankingCategoria).then(function(data){
+      if (!card || !document.body.contains(card)) return;
+      var lista = data.lista;
+      if (!lista.length){
+        card.innerHTML =
+          '<div class="ranking-header"><h3 style="font-size:16px;font-weight:600;">Ranking semanal</h3></div>' +
+          '<p class="ranking-semana">SEMANA DEL ' + data.rango + '</p>' +
+          '<div class="estado-vacio"><div class="estado-icono">' + cofreVacioSVG() + '</div>Todavía no hay resultados esta semana.<br>¡Juega y sé el primero en aparecer aquí!</div>';
+        return;
+      }
+
+      var podioHtml = '';
+      if (lista[0] || lista[1] || lista[2]){
+        podioHtml = '<div class="podio">' +
+          (lista[1] ? medallaHtml(lista[1], 2) : '<div class="podio-puesto"></div>') +
+          (lista[0] ? medallaHtml(lista[0], 1) : '<div class="podio-puesto"></div>') +
+          (lista[2] ? medallaHtml(lista[2], 3) : '<div class="podio-puesto"></div>') +
+        '</div>';
+      }
+
+      var resto = lista.slice(3);
+      var filas = resto.map(function(e,i){
+        return '<div class="ranking-row">' +
+          '<div class="rank-num">' + (i+4) + '</div>' +
+          '<div class="rank-info">' +
+            '<div class="rank-nombre">' + escapeHtml(e.nombre) + '</div>' +
+            '<div class="rank-meta">' + escapeHtml(e.colegio) + ' · ' + escapeHtml(e.region) + '</div>' +
+          '</div>' +
+          '<div class="rank-puntaje tabular">' + e.puntaje + '</div>' +
+        '</div>';
+      }).join('');
+
+      card.innerHTML =
+        '<div class="ranking-header"><h3 style="font-size:16px;font-weight:600;">Ranking semanal</h3></div>' +
+        '<p class="ranking-semana">SEMANA DEL ' + data.rango + ' · SE REINICIA CADA LUNES</p>' +
+        podioHtml + filas;
+    });
+  }
+
+  /* ---------------- Navegación inferior ---------------- */
+  document.querySelectorAll('.tab').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      if (tab.dataset.tab === 'ranking'){
+        state.rankingCategoria = state.categoria;
+        ir('ranking');
+      } else {
+        ir('niveles');
+      }
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
