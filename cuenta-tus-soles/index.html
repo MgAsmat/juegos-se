@@ -344,6 +344,8 @@
   .puesto-2 .medalla{ background: #9AA2B5; }
   .puesto-3 .medalla{ background: #B4835A; }
   .podio-nombre{ font-weight:700; font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+  .podio-colegio{ font-size:11px; font-weight:500; color:var(--ink-soft); line-height:1.3; min-height:2.6em; max-width:100%; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; word-break:break-word; margin-top:2px; }
+  .podio-region{ font-size:11px; font-weight:500; color:var(--ink-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; margin-bottom:2px; }
   .podio-puntaje{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:13px; color:var(--warm-deep); }
   .podio-base{ margin-top:8px; width:100%; border-radius:6px 6px 0 0; background: var(--line-soft); }
   .puesto-1 .podio-base{ height:40px; }
@@ -1089,6 +1091,8 @@
     return '<div class="podio-puesto puesto-' + puesto + '">' +
       '<div class="medalla">' + puesto + '</div>' +
       '<div class="podio-nombre">' + escapeHtml(entrada.nombre) + '</div>' +
+      '<div class="podio-colegio">' + escapeHtml(entrada.colegio || '—') + '</div>' +
+      '<div class="podio-region">' + escapeHtml(entrada.region || '') + '</div>' +
       '<div class="podio-puntaje tabular">' + entrada.puntaje + '</div>' +
       '<div class="podio-base"></div>' +
     '</div>';
