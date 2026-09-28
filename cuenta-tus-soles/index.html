@@ -596,43 +596,42 @@
     });
     return piezas;
   }
-  function splitOnce(piezas){
-    var candidatos = [];
-    piezas.forEach(function(p,i){ if (SPLIT_MAP[p]) candidatos.push(i); });
-    if (!candidatos.length) return piezas.slice();
-    var idx = elegir(candidatos);
-    var nuevas = piezas.slice();
-    var reemplazo = SPLIT_MAP[nuevas[idx]];
-    nuevas.splice.apply(nuevas, [idx,1].concat(reemplazo));
-    return nuevas;
-  }
   function comboKey(piezas){ return piezas.slice().sort(function(a,b){return a-b;}).join('-') + '|' + piezas.length; }
 
-  function generarPreguntaCombina(){
-    var montoSoles = 12 + Math.floor(Math.random()*180);
-    var correcta = greedyCombo(montoSoles);
+  var COMBINA_MAX_PIEZAS = 6;
+
+  // Todas las formas de pagar el monto partiendo piezas de la combinación
+  // óptima, sin superar COMBINA_MAX_PIEZAS.
+  function alternativasCombina(correcta){
     var vistos = {}; vistos[comboKey(correcta)] = true;
-    var alternativas = [];
-    var base = correcta;
-    var intentosTotales = 0;
-    while (alternativas.length < 3 && intentosTotales < 40){
-      intentosTotales++;
-      base = splitOnce(base.length > correcta.length ? base : correcta);
-      var k = comboKey(base);
-      if (!vistos[k] && base.length > correcta.length){
+    var cola = [correcta], resultado = [];
+    while (cola.length){
+      var actual = cola.shift();
+      actual.forEach(function(p,i){
+        if (!SPLIT_MAP[p]) return;
+        var nuevas = actual.slice();
+        nuevas.splice.apply(nuevas, [i,1].concat(SPLIT_MAP[p]));
+        var k = comboKey(nuevas);
+        if (nuevas.length > COMBINA_MAX_PIEZAS || vistos[k]) return;
         vistos[k] = true;
-        alternativas.push(base.slice());
-      }
-      if (intentosTotales % 8 === 0) base = correcta;
+        resultado.push(nuevas);
+        cola.push(nuevas);
+      });
     }
-    while (alternativas.length < 3){
-      alternativas.push(splitOnce(correcta).length > correcta.length ? splitOnce(correcta) : correcta.concat([]));
-    }
+    return resultado;
+  }
+
+  function generarPreguntaCombina(){
+    var montoSoles, correcta, alternativas;
+    do {
+      montoSoles = 12 + Math.floor(Math.random()*180);
+      correcta = greedyCombo(montoSoles);
+      alternativas = correcta.length < COMBINA_MAX_PIEZAS ? shuffle(alternativasCombina(correcta)) : [];
+    } while (alternativas.length < 2);
     var combos = shuffle([
       { piezas: correcta, correcta: true },
       { piezas: alternativas[0], correcta: false },
-      { piezas: alternativas[1], correcta: false },
-      { piezas: alternativas[2], correcta: false }
+      { piezas: alternativas[1], correcta: false }
     ]);
     return {
       enunciado: 'Quieres pagar exactamente S/ ' + montoSoles + '. ¿Cuál combinación usa la menor cantidad de billetes y monedas?',
