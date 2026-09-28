@@ -238,6 +238,7 @@
     margin-bottom:5px;
   }
   .nivel-texto h3{ font-size:16.5px; font-weight:700; }
+  .nivel-grados{ font-weight:500; color:var(--ink-soft); font-size:.82em; white-space:nowrap; }
   .nivel-texto p{ margin:3px 0 0; font-size:12.5px; font-weight:500; color:var(--ink-soft); }
 
   /* ---------- Juego ---------- */
@@ -671,14 +672,14 @@
 
   var NIVELES = {
     primaria: [
-      { id:1, nombre:'Reconoce', desc:'Identifica el valor de billetes y monedas', gen: generarPreguntaReconoce, tiempo:16, icono: miniIconRow([20,1]), color:'#E1992E' },
-      { id:2, nombre:'Suma sencilla', desc:'Suma billetes y monedas', gen: generarPreguntaSuma, tiempo:18, icono: miniIconRow([0.5,1]), color:'#227CA3' },
-      { id:3, nombre:'El vuelto', desc:'Calcula el vuelto de una compra', gen: generarPreguntaVueltoSimple, tiempo:22, icono: miniIconRow([10]), color:'#32384D' }
+      { id:1, nombre:'Reconoce', grados:'1.° y 2.° de primaria', desc:'Identifica el valor de billetes y monedas', gen: generarPreguntaReconoce, tiempo:16, icono: miniIconRow([20,1]), color:'#E1992E' },
+      { id:2, nombre:'Suma sencilla', grados:'2.° y 3.° de primaria', desc:'Suma billetes y monedas', gen: generarPreguntaSuma, tiempo:18, icono: miniIconRow([0.5,1]), color:'#227CA3' },
+      { id:3, nombre:'El vuelto', grados:'4.° a 6.° de primaria', desc:'Calcula el vuelto de una compra', gen: generarPreguntaVueltoSimple, tiempo:22, icono: miniIconRow([10]), color:'#32384D' }
     ],
     secundaria: [
-      { id:4, nombre:'Combina', desc:'Paga con la menor cantidad de piezas', gen: generarPreguntaCombina, tiempo:25, icono: miniIconRow([50,10]), color:'#B97B1E' },
-      { id:5, nombre:'Vuelto exacto', desc:'Calcula el vuelto de compras múltiples', gen: generarPreguntaVueltoComplejo, tiempo:26, icono: miniIconRow([100,5]), color:'#17607F' },
-      { id:6, nombre:'Descuentos', desc:'Aplica porcentajes sobre un precio', gen: generarPreguntaDescuento, tiempo:22, icono: '<div class="icono-percent">%</div>', color:'#5B9C93' }
+      { id:4, nombre:'Combina', grados:'1.° y 2.° de secundaria', desc:'Paga con la menor cantidad de piezas', gen: generarPreguntaCombina, tiempo:25, icono: miniIconRow([50,10]), color:'#B97B1E' },
+      { id:5, nombre:'Vuelto exacto', grados:'2.° y 3.° de secundaria', desc:'Calcula el vuelto de compras múltiples', gen: generarPreguntaVueltoComplejo, tiempo:26, icono: miniIconRow([100,5]), color:'#17607F' },
+      { id:6, nombre:'Descuentos', grados:'3.° a 5.° de secundaria', desc:'Aplica porcentajes sobre un precio', gen: generarPreguntaDescuento, tiempo:22, icono: '<div class="icono-percent">%</div>', color:'#5B9C93' }
     ]
   };
 
@@ -794,7 +795,7 @@
         '<div class="nivel-icono">' + nivel.icono + '</div>' +
         '<div class="nivel-texto">' +
           '<span class="nivel-badge">NIVEL ' + nivel.id + '</span>' +
-          '<h3>' + nivel.nombre + '</h3>' +
+          '<h3>' + nivel.nombre + ' <span class="nivel-grados">(' + nivel.grados + ')</span></h3>' +
           '<p>' + nivel.desc + '</p>' +
         '</div>';
       card.addEventListener('click', function(){ iniciarNivel(nivel); });
@@ -885,7 +886,7 @@
         '</div>' +
         '<div class="timerbar"><div class="timerbar-fill" id="timer-fill" style="width:100%"></div></div>' +
         '<p class="nivel-tag">NIVEL ' + nivel.id + ' · PREGUNTA ' + (state.preguntaIndex+1) + '/' + TOTAL_PREGUNTAS + '</p>' +
-        '<h3 class="nivel-titulo">' + nivel.nombre + '</h3>' +
+        '<h3 class="nivel-titulo">' + nivel.nombre + ' <span class="nivel-grados">(' + nivel.grados + ')</span></h3>' +
         visualHtml +
         '<p class="pregunta-enunciado">' + p.enunciado + '</p>' +
         opcionesHtml +
