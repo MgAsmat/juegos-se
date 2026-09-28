@@ -696,28 +696,47 @@
     return { key: d.getUTCFullYear() + '-W' + String(weekNo).padStart(2,'0'), rango: rango };
   }
 
-  /* ---------------- Almacenamiento (ranking compartido) ---------------- */
-  function storageDisponible(){ return typeof window.storage !== 'undefined' && window.storage; }
+  /* ---------------- Almacenamiento (ranking compartido) ----------------
+     Si la página corre donde existe window.storage (ranking compartido
+     entre jugadores) se usa ese. Si no — por ejemplo al abrir el archivo
+     directamente para probar — se usa el almacenamiento local del
+     navegador (o memoria, si ese tampoco está disponible), así se puede
+     probar el flujo de guardar y ver el ranking. */
+  var memoriaLocal = {};
+  var storageLocal = {
+    get: function(key){
+      var v = null;
+      try{ v = window.localStorage.getItem(key); }catch(e){ v = null; }
+      if (v === null && memoriaLocal[key] !== undefined) v = memoriaLocal[key];
+      return Promise.resolve(v === null ? null : { value: v });
+    },
+    set: function(key, value){
+      memoriaLocal[key] = value;
+      try{ window.localStorage.setItem(key, value); }catch(e){}
+      return Promise.resolve();
+    }
+  };
+  function rankingCompartido(){ return typeof window.storage !== 'undefined' && !!window.storage; }
+  function almacen(){ return rankingCompartido() ? window.storage : storageLocal; }
 
   function guardarEnRanking(entrada, categoria){
     var semana = getISOWeekInfo(new Date());
     var key = 'leaderboard:' + semana.key + ':' + categoria;
-    if (!storageDisponible()) return Promise.resolve(false);
-    return window.storage.get(key, true).catch(function(){ return null; }).then(function(res){
+    var st = almacen();
+    return st.get(key, true).catch(function(){ return null; }).then(function(res){
       var lista = [];
       try{ if (res && res.value) lista = JSON.parse(res.value); }catch(e){ lista = []; }
       lista.push(entrada);
       lista.sort(function(a,b){ return b.puntaje - a.puntaje; });
       lista = lista.slice(0,50);
-      return window.storage.set(key, JSON.stringify(lista), true).then(function(){ return true; });
+      return st.set(key, JSON.stringify(lista), true).then(function(){ return true; });
     }).catch(function(){ return false; });
   }
 
   function cargarRanking(categoria){
     var semana = getISOWeekInfo(new Date());
     var key = 'leaderboard:' + semana.key + ':' + categoria;
-    if (!storageDisponible()) return Promise.resolve({ lista: [], rango: semana.rango });
-    return window.storage.get(key, true).catch(function(){ return null; }).then(function(res){
+    return almacen().get(key, true).catch(function(){ return null; }).then(function(res){
       var lista = [];
       try{ if (res && res.value) lista = JSON.parse(res.value); }catch(e){ lista = []; }
       return { lista: lista, rango: semana.rango };
@@ -1075,6 +1094,11 @@
     '</div>';
   }
 
+  function avisoModoPrueba(){
+    if (rankingCompartido()) return '';
+    return '<p class="field-hint" style="text-align:center;margin-top:12px;">Modo de prueba: los puntajes se guardan solo en este navegador.</p>';
+  }
+
   function cargarYMostrarRanking(){
     var card = document.getElementById('ranking-card');
     cargarRanking(state.rankingCategoria).then(function(data){
@@ -1084,7 +1108,7 @@
         card.innerHTML =
           '<div class="ranking-header"><h3 style="font-size:15.5px;font-weight:700;">Ranking semanal</h3></div>' +
           '<p class="ranking-semana">Semana del ' + data.rango + '</p>' +
-          '<div class="estado-vacio"><div class="estado-icono">' + cofreVacioSVG() + '</div>Todavía no hay resultados esta semana.<br>¡Juega y sé el primero en aparecer aquí!</div>';
+          '<div class="estado-vacio"><div class="estado-icono">' + cofreVacioSVG() + '</div>Todavía no hay resultados esta semana.<br>¡Juega y sé el primero en aparecer aquí!</div>' + avisoModoPrueba();
         return;
       }
 
@@ -1112,7 +1136,7 @@
       card.innerHTML =
         '<div class="ranking-header"><h3 style="font-size:15.5px;font-weight:700;">Ranking semanal</h3></div>' +
         '<p class="ranking-semana">Semana del ' + data.rango + ' · se reinicia cada lunes</p>' +
-        podioHtml + filas;
+        podioHtml + filas + avisoModoPrueba();
     });
   }
 
