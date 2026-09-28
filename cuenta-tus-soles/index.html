@@ -976,8 +976,8 @@
         '<h3 style="font-size:15px;font-weight:700;margin-bottom:4px;">Guarda tu puntaje (opcional)</h3>' +
         '<p style="font-size:12.5px;font-weight:500;color:var(--ink-soft);margin:0 0 14px;">Regístrate para aparecer en el ranking semanal de ' + (state.categoria==='primaria'?'Primaria':'Secundaria') + '.</p>' +
         '<div class="field">' +
-          '<label for="in-nombre">Nombre</label>' +
-          '<input id="in-nombre" type="text" maxlength="40" placeholder="¿Cómo te llamas?" value="' + (state.player ? escapeHtml(state.player.nombre) : '') + '">' +
+          '<label for="in-nombre">Alias</label>' +
+          '<input id="in-nombre" type="text" maxlength="40" placeholder="Ej.: SolesVeloz23" value="' + (state.player ? escapeHtml(state.player.nombre) : '') + '">' +
         '</div>' +
         '<div class="field">' +
           '<label for="in-colegio">Colegio (opcional)</label>' +
@@ -994,7 +994,7 @@
           '</select>' +
         '</div>' +
         '<button class="btn btn-primary" id="btn-guardar">Guardar puntaje</button>' +
-        '<p class="field-hint">Tu nombre, colegio y región aparecerán en la tabla de posiciones semanal, visible para cualquiera que juegue.</p>' +
+        '<p class="field-hint">Tu alias, colegio y región aparecerán en la tabla de posiciones semanal, visible para cualquiera que juegue.</p>' +
       '</div>';
     }
 
