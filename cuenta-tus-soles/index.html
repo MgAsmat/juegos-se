@@ -238,6 +238,7 @@
     margin-bottom:5px;
   }
   .nivel-texto h3{ font-size:16.5px; font-weight:700; }
+  .nivel-grados{ font-weight:500; color:var(--ink-soft); font-size:.82em; white-space:nowrap; }
   .nivel-texto p{ margin:3px 0 0; font-size:12.5px; font-weight:500; color:var(--ink-soft); }
 
   /* ---------- Juego ---------- */
@@ -343,6 +344,8 @@
   .puesto-2 .medalla{ background: #9AA2B5; }
   .puesto-3 .medalla{ background: #B4835A; }
   .podio-nombre{ font-weight:700; font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+  .podio-colegio{ font-size:11px; font-weight:500; color:var(--ink-soft); line-height:1.3; min-height:2.6em; max-width:100%; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; word-break:break-word; margin-top:2px; }
+  .podio-region{ font-size:11px; font-weight:500; color:var(--ink-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; margin-bottom:2px; }
   .podio-puntaje{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:13px; color:var(--warm-deep); }
   .podio-base{ margin-top:8px; width:100%; border-radius:6px 6px 0 0; background: var(--line-soft); }
   .puesto-1 .podio-base{ height:40px; }
@@ -595,43 +598,42 @@
     });
     return piezas;
   }
-  function splitOnce(piezas){
-    var candidatos = [];
-    piezas.forEach(function(p,i){ if (SPLIT_MAP[p]) candidatos.push(i); });
-    if (!candidatos.length) return piezas.slice();
-    var idx = elegir(candidatos);
-    var nuevas = piezas.slice();
-    var reemplazo = SPLIT_MAP[nuevas[idx]];
-    nuevas.splice.apply(nuevas, [idx,1].concat(reemplazo));
-    return nuevas;
-  }
   function comboKey(piezas){ return piezas.slice().sort(function(a,b){return a-b;}).join('-') + '|' + piezas.length; }
 
-  function generarPreguntaCombina(){
-    var montoSoles = 12 + Math.floor(Math.random()*180);
-    var correcta = greedyCombo(montoSoles);
+  var COMBINA_MAX_PIEZAS = 6;
+
+  // Todas las formas de pagar el monto partiendo piezas de la combinación
+  // óptima, sin superar COMBINA_MAX_PIEZAS.
+  function alternativasCombina(correcta){
     var vistos = {}; vistos[comboKey(correcta)] = true;
-    var alternativas = [];
-    var base = correcta;
-    var intentosTotales = 0;
-    while (alternativas.length < 3 && intentosTotales < 40){
-      intentosTotales++;
-      base = splitOnce(base.length > correcta.length ? base : correcta);
-      var k = comboKey(base);
-      if (!vistos[k] && base.length > correcta.length){
+    var cola = [correcta], resultado = [];
+    while (cola.length){
+      var actual = cola.shift();
+      actual.forEach(function(p,i){
+        if (!SPLIT_MAP[p]) return;
+        var nuevas = actual.slice();
+        nuevas.splice.apply(nuevas, [i,1].concat(SPLIT_MAP[p]));
+        var k = comboKey(nuevas);
+        if (nuevas.length > COMBINA_MAX_PIEZAS || vistos[k]) return;
         vistos[k] = true;
-        alternativas.push(base.slice());
-      }
-      if (intentosTotales % 8 === 0) base = correcta;
+        resultado.push(nuevas);
+        cola.push(nuevas);
+      });
     }
-    while (alternativas.length < 3){
-      alternativas.push(splitOnce(correcta).length > correcta.length ? splitOnce(correcta) : correcta.concat([]));
-    }
+    return resultado;
+  }
+
+  function generarPreguntaCombina(){
+    var montoSoles, correcta, alternativas;
+    do {
+      montoSoles = 12 + Math.floor(Math.random()*180);
+      correcta = greedyCombo(montoSoles);
+      alternativas = correcta.length < COMBINA_MAX_PIEZAS ? shuffle(alternativasCombina(correcta)) : [];
+    } while (alternativas.length < 2);
     var combos = shuffle([
       { piezas: correcta, correcta: true },
       { piezas: alternativas[0], correcta: false },
-      { piezas: alternativas[1], correcta: false },
-      { piezas: alternativas[2], correcta: false }
+      { piezas: alternativas[1], correcta: false }
     ]);
     return {
       enunciado: 'Quieres pagar exactamente S/ ' + montoSoles + '. ¿Cuál combinación usa la menor cantidad de billetes y monedas?',
@@ -671,14 +673,14 @@
 
   var NIVELES = {
     primaria: [
-      { id:1, nombre:'Reconoce', desc:'Identifica el valor de billetes y monedas', gen: generarPreguntaReconoce, tiempo:16, icono: miniIconRow([20,1]), color:'#E1992E' },
-      { id:2, nombre:'Suma sencilla', desc:'Suma billetes y monedas', gen: generarPreguntaSuma, tiempo:18, icono: miniIconRow([0.5,1]), color:'#227CA3' },
-      { id:3, nombre:'El vuelto', desc:'Calcula el vuelto de una compra', gen: generarPreguntaVueltoSimple, tiempo:22, icono: miniIconRow([10]), color:'#32384D' }
+      { id:1, nombre:'Reconoce', grados:'1.° y 2.° de primaria', desc:'Identifica el valor de billetes y monedas', gen: generarPreguntaReconoce, tiempo:16, icono: miniIconRow([20,1]), color:'#E1992E' },
+      { id:2, nombre:'Suma sencilla', grados:'2.° y 3.° de primaria', desc:'Suma billetes y monedas', gen: generarPreguntaSuma, tiempo:18, icono: miniIconRow([0.5,1]), color:'#227CA3' },
+      { id:3, nombre:'El vuelto', grados:'4.° a 6.° de primaria', desc:'Calcula el vuelto de una compra', gen: generarPreguntaVueltoSimple, tiempo:22, icono: miniIconRow([10]), color:'#32384D' }
     ],
     secundaria: [
-      { id:4, nombre:'Combina', desc:'Paga con la menor cantidad de piezas', gen: generarPreguntaCombina, tiempo:25, icono: miniIconRow([50,10]), color:'#B97B1E' },
-      { id:5, nombre:'Vuelto exacto', desc:'Calcula el vuelto de compras múltiples', gen: generarPreguntaVueltoComplejo, tiempo:26, icono: miniIconRow([100,5]), color:'#17607F' },
-      { id:6, nombre:'Descuentos', desc:'Aplica porcentajes sobre un precio', gen: generarPreguntaDescuento, tiempo:22, icono: '<div class="icono-percent">%</div>', color:'#5B9C93' }
+      { id:4, nombre:'Combina', grados:'1.° y 2.° de secundaria', desc:'Paga con la menor cantidad de piezas', gen: generarPreguntaCombina, tiempo:25, icono: miniIconRow([50,10]), color:'#B97B1E' },
+      { id:5, nombre:'Vuelto exacto', grados:'2.° y 3.° de secundaria', desc:'Calcula el vuelto de compras múltiples', gen: generarPreguntaVueltoComplejo, tiempo:26, icono: miniIconRow([100,5]), color:'#17607F' },
+      { id:6, nombre:'Descuentos', grados:'3.° a 5.° de secundaria', desc:'Aplica porcentajes sobre un precio', gen: generarPreguntaDescuento, tiempo:22, icono: '<div class="icono-percent">%</div>', color:'#5B9C93' }
     ]
   };
 
@@ -696,28 +698,47 @@
     return { key: d.getUTCFullYear() + '-W' + String(weekNo).padStart(2,'0'), rango: rango };
   }
 
-  /* ---------------- Almacenamiento (ranking compartido) ---------------- */
-  function storageDisponible(){ return typeof window.storage !== 'undefined' && window.storage; }
+  /* ---------------- Almacenamiento (ranking compartido) ----------------
+     Si la página corre donde existe window.storage (ranking compartido
+     entre jugadores) se usa ese. Si no — por ejemplo al abrir el archivo
+     directamente para probar — se usa el almacenamiento local del
+     navegador (o memoria, si ese tampoco está disponible), así se puede
+     probar el flujo de guardar y ver el ranking. */
+  var memoriaLocal = {};
+  var storageLocal = {
+    get: function(key){
+      var v = null;
+      try{ v = window.localStorage.getItem(key); }catch(e){ v = null; }
+      if (v === null && memoriaLocal[key] !== undefined) v = memoriaLocal[key];
+      return Promise.resolve(v === null ? null : { value: v });
+    },
+    set: function(key, value){
+      memoriaLocal[key] = value;
+      try{ window.localStorage.setItem(key, value); }catch(e){}
+      return Promise.resolve();
+    }
+  };
+  function rankingCompartido(){ return typeof window.storage !== 'undefined' && !!window.storage; }
+  function almacen(){ return rankingCompartido() ? window.storage : storageLocal; }
 
   function guardarEnRanking(entrada, categoria){
     var semana = getISOWeekInfo(new Date());
     var key = 'leaderboard:' + semana.key + ':' + categoria;
-    if (!storageDisponible()) return Promise.resolve(false);
-    return window.storage.get(key, true).catch(function(){ return null; }).then(function(res){
+    var st = almacen();
+    return st.get(key, true).catch(function(){ return null; }).then(function(res){
       var lista = [];
       try{ if (res && res.value) lista = JSON.parse(res.value); }catch(e){ lista = []; }
       lista.push(entrada);
       lista.sort(function(a,b){ return b.puntaje - a.puntaje; });
       lista = lista.slice(0,50);
-      return window.storage.set(key, JSON.stringify(lista), true).then(function(){ return true; });
+      return st.set(key, JSON.stringify(lista), true).then(function(){ return true; });
     }).catch(function(){ return false; });
   }
 
   function cargarRanking(categoria){
     var semana = getISOWeekInfo(new Date());
     var key = 'leaderboard:' + semana.key + ':' + categoria;
-    if (!storageDisponible()) return Promise.resolve({ lista: [], rango: semana.rango });
-    return window.storage.get(key, true).catch(function(){ return null; }).then(function(res){
+    return almacen().get(key, true).catch(function(){ return null; }).then(function(res){
       var lista = [];
       try{ if (res && res.value) lista = JSON.parse(res.value); }catch(e){ lista = []; }
       return { lista: lista, rango: semana.rango };
@@ -794,7 +815,7 @@
         '<div class="nivel-icono">' + nivel.icono + '</div>' +
         '<div class="nivel-texto">' +
           '<span class="nivel-badge">NIVEL ' + nivel.id + '</span>' +
-          '<h3>' + nivel.nombre + '</h3>' +
+          '<h3>' + nivel.nombre + ' <span class="nivel-grados">(' + nivel.grados + ')</span></h3>' +
           '<p>' + nivel.desc + '</p>' +
         '</div>';
       card.addEventListener('click', function(){ iniciarNivel(nivel); });
@@ -885,7 +906,7 @@
         '</div>' +
         '<div class="timerbar"><div class="timerbar-fill" id="timer-fill" style="width:100%"></div></div>' +
         '<p class="nivel-tag">NIVEL ' + nivel.id + ' · PREGUNTA ' + (state.preguntaIndex+1) + '/' + TOTAL_PREGUNTAS + '</p>' +
-        '<h3 class="nivel-titulo">' + nivel.nombre + '</h3>' +
+        '<h3 class="nivel-titulo">' + nivel.nombre + ' <span class="nivel-grados">(' + nivel.grados + ')</span></h3>' +
         visualHtml +
         '<p class="pregunta-enunciado">' + p.enunciado + '</p>' +
         opcionesHtml +
@@ -957,8 +978,8 @@
         '<h3 style="font-size:15px;font-weight:700;margin-bottom:4px;">Guarda tu puntaje (opcional)</h3>' +
         '<p style="font-size:12.5px;font-weight:500;color:var(--ink-soft);margin:0 0 14px;">Regístrate para aparecer en el ranking semanal de ' + (state.categoria==='primaria'?'Primaria':'Secundaria') + '.</p>' +
         '<div class="field">' +
-          '<label for="in-nombre">Nombre</label>' +
-          '<input id="in-nombre" type="text" maxlength="40" placeholder="¿Cómo te llamas?" value="' + (state.player ? escapeHtml(state.player.nombre) : '') + '">' +
+          '<label for="in-nombre">Alias</label>' +
+          '<input id="in-nombre" type="text" maxlength="40" placeholder="Ej.: SolesVeloz23" value="' + (state.player ? escapeHtml(state.player.nombre) : '') + '">' +
         '</div>' +
         '<div class="field">' +
           '<label for="in-colegio">Colegio (opcional)</label>' +
@@ -975,7 +996,7 @@
           '</select>' +
         '</div>' +
         '<button class="btn btn-primary" id="btn-guardar">Guardar puntaje</button>' +
-        '<p class="field-hint">Tu nombre, colegio y región aparecerán en la tabla de posiciones semanal, visible para cualquiera que juegue.</p>' +
+        '<p class="field-hint">Tu alias, colegio y región aparecerán en la tabla de posiciones semanal, visible para cualquiera que juegue.</p>' +
       '</div>';
     }
 
@@ -1070,9 +1091,16 @@
     return '<div class="podio-puesto puesto-' + puesto + '">' +
       '<div class="medalla">' + puesto + '</div>' +
       '<div class="podio-nombre">' + escapeHtml(entrada.nombre) + '</div>' +
+      '<div class="podio-colegio">' + escapeHtml(entrada.colegio || '—') + '</div>' +
+      '<div class="podio-region">' + escapeHtml(entrada.region || '') + '</div>' +
       '<div class="podio-puntaje tabular">' + entrada.puntaje + '</div>' +
       '<div class="podio-base"></div>' +
     '</div>';
+  }
+
+  function avisoModoPrueba(){
+    if (rankingCompartido()) return '';
+    return '<p class="field-hint" style="text-align:center;margin-top:12px;">Modo de prueba: los puntajes se guardan solo en este navegador.</p>';
   }
 
   function cargarYMostrarRanking(){
@@ -1084,7 +1112,7 @@
         card.innerHTML =
           '<div class="ranking-header"><h3 style="font-size:15.5px;font-weight:700;">Ranking semanal</h3></div>' +
           '<p class="ranking-semana">Semana del ' + data.rango + '</p>' +
-          '<div class="estado-vacio"><div class="estado-icono">' + cofreVacioSVG() + '</div>Todavía no hay resultados esta semana.<br>¡Juega y sé el primero en aparecer aquí!</div>';
+          '<div class="estado-vacio"><div class="estado-icono">' + cofreVacioSVG() + '</div>Todavía no hay resultados esta semana.<br>¡Juega y sé el primero en aparecer aquí!</div>' + avisoModoPrueba();
         return;
       }
 
@@ -1112,7 +1140,7 @@
       card.innerHTML =
         '<div class="ranking-header"><h3 style="font-size:15.5px;font-weight:700;">Ranking semanal</h3></div>' +
         '<p class="ranking-semana">Semana del ' + data.rango + ' · se reinicia cada lunes</p>' +
-        podioHtml + filas;
+        podioHtml + filas + avisoModoPrueba();
     });
   }
 
