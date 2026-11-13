@@ -309,7 +309,7 @@
   }
   .combo-btn:not(:disabled):hover{ border-color: var(--accent); }
   .combo-piezas{ display:flex; flex:1; flex-wrap:wrap; gap:4px 0; }
-  .combo-piezas .pieza-mini{ width:38px; margin-right:-11px; }
+  .combo-piezas .pieza-mini{ width:38px; margin-right:3px; }
   .combo-piezas .pieza-mini svg, .combo-piezas .pieza-mini img{ width:100%; display:block; }
   .combo-count{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:600; color: var(--ink-soft); white-space:nowrap; }
   .combo-btn.correcta{ background: var(--correct-bg); border-color: var(--correct); }
@@ -434,7 +434,7 @@
   ];
 
   var PRODUCTOS = [
-    {nombre:'una casaca', precio:89},
+    {nombre:'una casaca', precio:80},
     {nombre:'unas zapatillas', precio:120},
     {nombre:'una mochila', precio:75},
     {nombre:'un libro', precio:45},
@@ -474,7 +474,7 @@
     });
   }
 
-  function generarOpciones(correctoCentimos, unidad){
+  function generarOpciones(correctoCentimos, unidad, sinDecimales){
     var mult = [1,2,3,5,8,10,15,20];
     var valores = {};
     valores[correctoCentimos] = true;
@@ -489,7 +489,7 @@
     var arr = Object.keys(valores).map(Number);
     shuffle(arr);
     return arr.map(function(v){
-      return { label: formatMoney(v), value:v, correcta: v === correctoCentimos };
+      return { label: sinDecimales ? 'S/ ' + (v/100) : formatMoney(v), value:v, correcta: v === correctoCentimos };
     });
   }
 
@@ -629,6 +629,14 @@
       montoSoles = 12 + Math.floor(Math.random()*180);
       correcta = greedyCombo(montoSoles);
       alternativas = correcta.length < COMBINA_MAX_PIEZAS ? shuffle(alternativasCombina(correcta)) : [];
+      // una alternativa por cantidad de piezas: las tres opciones deben
+      // tener un número de piezas distinto para que no haya empates.
+      var porCantidad = {};
+      alternativas = alternativas.filter(function(a){
+        if (a.length === correcta.length || porCantidad[a.length]) return false;
+        porCantidad[a.length] = true;
+        return true;
+      });
     } while (alternativas.length < 2);
     var combos = shuffle([
       { piezas: correcta, correcta: true },
@@ -658,16 +666,22 @@
   }
 
   function generarPreguntaDescuento(){
-    var producto = elegir(PRODUCTOS);
-    var descuento = elegir(DESCUENTOS);
+    // solo combinaciones precio/descuento cuyo ahorro sea un monto entero
+    var pares = [];
+    PRODUCTOS.forEach(function(p){
+      DESCUENTOS.forEach(function(d){ if ((p.precio * d) % 100 === 0) pares.push({producto:p, descuento:d}); });
+    });
+    var par = elegir(pares);
+    var producto = par.producto;
+    var descuento = par.descuento;
     var precioCentimos = producto.precio*100;
     var ahorroCentimos = Math.round(precioCentimos * descuento / 100);
     var finalCentimos = precioCentimos - ahorroCentimos;
     var preguntarAhorro = Math.random() < 0.5;
     var objetivo = preguntarAhorro ? ahorroCentimos : finalCentimos;
     return {
-      enunciado: capitalize(producto.nombre) + ' cuesta ' + formatMoney(precioCentimos) + ' y tiene un descuento del ' + descuento + '%. ¿Cuánto ' + (preguntarAhorro ? 'ahorras' : 'pagas') + '?',
-      opciones: generarOpciones(objetivo, 50)
+      enunciado: capitalize(producto.nombre) + ' cuesta S/ ' + producto.precio + ' y tiene un descuento del ' + descuento + '%. ¿Cuánto ' + (preguntarAhorro ? 'ahorras' : 'pagas') + '?',
+      opciones: generarOpciones(objetivo, 100, true)
     };
   }
 
