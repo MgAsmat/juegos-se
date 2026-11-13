@@ -309,7 +309,7 @@
   }
   .combo-btn:not(:disabled):hover{ border-color: var(--accent); }
   .combo-piezas{ display:flex; flex:1; flex-wrap:wrap; gap:4px 0; }
-  .combo-piezas .pieza-mini{ width:38px; margin-right:-11px; }
+  .combo-piezas .pieza-mini{ width:38px; margin-right:3px; }
   .combo-piezas .pieza-mini svg, .combo-piezas .pieza-mini img{ width:100%; display:block; }
   .combo-count{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:600; color: var(--ink-soft); white-space:nowrap; }
   .combo-btn.correcta{ background: var(--correct-bg); border-color: var(--correct); }
@@ -510,19 +510,7 @@
     return '<img class="pieza-svg pieza-billete-icono" src="assets/billetes/' + valor + '-icono.jpg" ' +
       'alt="Billete de ' + valor + ' soles" loading="lazy" decoding="async">';
   }
-  // Las fotos de S/ 2 y S/ 5 (bimetálicas) no se distinguen a tamaño
-  // de pieza, así que se dibujan como ícono con el numeral grande.
-  function monedaBimetalicaSVG(valor){
-    return '<svg class="pieza-svg pieza-moneda pieza-moneda-real" viewBox="0 0 100 100" role="img" aria-label="Moneda de S/ ' + valor + '">' +
-      '<circle cx="50" cy="50" r="48" fill="#C9CDD2" stroke="#8E959C" stroke-width="2"/>' +
-      '<circle cx="50" cy="50" r="41" fill="none" stroke="#A7AEB5" stroke-width="1.5" stroke-dasharray="2 3"/>' +
-      '<circle cx="50" cy="50" r="33" fill="#E2B93B" stroke="#B48A1C" stroke-width="2"/>' +
-      '<text x="50" y="62" text-anchor="middle" font-family="IBM Plex Sans,Arial,sans-serif" font-weight="700" font-size="40" fill="#5A4208">' + valor + '</text>' +
-      '<text x="50" y="91" text-anchor="middle" font-family="IBM Plex Sans,Arial,sans-serif" font-weight="700" font-size="9.5" letter-spacing="1" fill="#4A5056">SOLES</text>' +
-      '</svg>';
-  }
   function piezaMoneda(valor){
-    if (valor === 2 || valor === 5) return monedaBimetalicaSVG(valor);
     var archivo = MONEDA_ARCHIVO[valor];
     var label = valor < 1 ? Math.round(valor*100) + ' céntimos' : ('S/ ' + valor);
     return '<img class="pieza-svg pieza-moneda pieza-moneda-real" src="assets/monedas/' + archivo + '.png" ' +
