@@ -434,7 +434,7 @@
   ];
 
   var PRODUCTOS = [
-    {nombre:'una casaca', precio:89},
+    {nombre:'una casaca', precio:80},
     {nombre:'unas zapatillas', precio:120},
     {nombre:'una mochila', precio:75},
     {nombre:'un libro', precio:45},
@@ -474,7 +474,7 @@
     });
   }
 
-  function generarOpciones(correctoCentimos, unidad){
+  function generarOpciones(correctoCentimos, unidad, sinDecimales){
     var mult = [1,2,3,5,8,10,15,20];
     var valores = {};
     valores[correctoCentimos] = true;
@@ -489,7 +489,7 @@
     var arr = Object.keys(valores).map(Number);
     shuffle(arr);
     return arr.map(function(v){
-      return { label: formatMoney(v), value:v, correcta: v === correctoCentimos };
+      return { label: sinDecimales ? 'S/ ' + (v/100) : formatMoney(v), value:v, correcta: v === correctoCentimos };
     });
   }
 
@@ -510,7 +510,19 @@
     return '<img class="pieza-svg pieza-billete-icono" src="assets/billetes/' + valor + '-icono.jpg" ' +
       'alt="Billete de ' + valor + ' soles" loading="lazy" decoding="async">';
   }
+  // Las fotos de S/ 2 y S/ 5 (bimetálicas) no se distinguen a tamaño
+  // de pieza, así que se dibujan como ícono con el numeral grande.
+  function monedaBimetalicaSVG(valor){
+    return '<svg class="pieza-svg pieza-moneda pieza-moneda-real" viewBox="0 0 100 100" role="img" aria-label="Moneda de S/ ' + valor + '">' +
+      '<circle cx="50" cy="50" r="48" fill="#C9CDD2" stroke="#8E959C" stroke-width="2"/>' +
+      '<circle cx="50" cy="50" r="41" fill="none" stroke="#A7AEB5" stroke-width="1.5" stroke-dasharray="2 3"/>' +
+      '<circle cx="50" cy="50" r="33" fill="#E2B93B" stroke="#B48A1C" stroke-width="2"/>' +
+      '<text x="50" y="62" text-anchor="middle" font-family="IBM Plex Sans,Arial,sans-serif" font-weight="700" font-size="40" fill="#5A4208">' + valor + '</text>' +
+      '<text x="50" y="91" text-anchor="middle" font-family="IBM Plex Sans,Arial,sans-serif" font-weight="700" font-size="9.5" letter-spacing="1" fill="#4A5056">SOLES</text>' +
+      '</svg>';
+  }
   function piezaMoneda(valor){
+    if (valor === 2 || valor === 5) return monedaBimetalicaSVG(valor);
     var archivo = MONEDA_ARCHIVO[valor];
     var label = valor < 1 ? Math.round(valor*100) + ' céntimos' : ('S/ ' + valor);
     return '<img class="pieza-svg pieza-moneda pieza-moneda-real" src="assets/monedas/' + archivo + '.png" ' +
@@ -629,6 +641,14 @@
       montoSoles = 12 + Math.floor(Math.random()*180);
       correcta = greedyCombo(montoSoles);
       alternativas = correcta.length < COMBINA_MAX_PIEZAS ? shuffle(alternativasCombina(correcta)) : [];
+      // una alternativa por cantidad de piezas: las tres opciones deben
+      // tener un número de piezas distinto para que no haya empates.
+      var porCantidad = {};
+      alternativas = alternativas.filter(function(a){
+        if (a.length === correcta.length || porCantidad[a.length]) return false;
+        porCantidad[a.length] = true;
+        return true;
+      });
     } while (alternativas.length < 2);
     var combos = shuffle([
       { piezas: correcta, correcta: true },
@@ -658,16 +678,22 @@
   }
 
   function generarPreguntaDescuento(){
-    var producto = elegir(PRODUCTOS);
-    var descuento = elegir(DESCUENTOS);
+    // solo combinaciones precio/descuento cuyo ahorro sea un monto entero
+    var pares = [];
+    PRODUCTOS.forEach(function(p){
+      DESCUENTOS.forEach(function(d){ if ((p.precio * d) % 100 === 0) pares.push({producto:p, descuento:d}); });
+    });
+    var par = elegir(pares);
+    var producto = par.producto;
+    var descuento = par.descuento;
     var precioCentimos = producto.precio*100;
     var ahorroCentimos = Math.round(precioCentimos * descuento / 100);
     var finalCentimos = precioCentimos - ahorroCentimos;
     var preguntarAhorro = Math.random() < 0.5;
     var objetivo = preguntarAhorro ? ahorroCentimos : finalCentimos;
     return {
-      enunciado: capitalize(producto.nombre) + ' cuesta ' + formatMoney(precioCentimos) + ' y tiene un descuento del ' + descuento + '%. ¿Cuánto ' + (preguntarAhorro ? 'ahorras' : 'pagas') + '?',
-      opciones: generarOpciones(objetivo, 50)
+      enunciado: capitalize(producto.nombre) + ' cuesta S/ ' + producto.precio + ' y tiene un descuento del ' + descuento + '%. ¿Cuánto ' + (preguntarAhorro ? 'ahorras' : 'pagas') + '?',
+      opciones: generarOpciones(objetivo, 100, true)
     };
   }
 
