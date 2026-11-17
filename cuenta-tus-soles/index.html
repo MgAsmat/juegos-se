@@ -623,28 +623,67 @@
     return resultado;
   }
 
+  function sumaPiezas(piezas){ return piezas.reduce(function(a,b){ return a+b; }, 0); }
+
+  // Opción trampa: una combinación que NO suma el monto pedido. Para que el
+  // alumno no elija por reflejo la opción con menos piezas, la trampa suele
+  // tener MENOS piezas que la respuesta correcta (quitando una pieza o
+  // juntando dos en una sola de otro valor). A veces tiene más piezas, para
+  // que "descartar siempre la más corta" tampoco funcione como atajo.
+  function trampaCombina(correcta, montoSoles, menos){
+    var candidatas = [];
+    if (menos){
+      correcta.forEach(function(_, i){
+        var c = correcta.slice(); c.splice(i, 1);
+        if (c.length) candidatas.push(c);
+      });
+      for (var i=0;i<correcta.length;i++){
+        for (var j=i+1;j<correcta.length;j++){
+          var par = correcta[i] + correcta[j];
+          DENOMS_SOLES.forEach(function(d){
+            if (d === par || Math.abs(d - par) > par * 0.5) return;
+            var c = correcta.filter(function(_, k){ return k !== i && k !== j; });
+            c.push(d);
+            candidatas.push(c.sort(function(a,b){ return b-a; }));
+          });
+        }
+      }
+    } else {
+      [1,2,5].forEach(function(d){
+        candidatas.push(correcta.concat([d]).sort(function(a,b){ return b-a; }));
+      });
+    }
+    candidatas = candidatas.filter(function(c){
+      return sumaPiezas(c) !== montoSoles && c.length <= COMBINA_MAX_PIEZAS;
+    });
+    return candidatas.length ? elegir(candidatas) : null;
+  }
+
   function generarPreguntaCombina(){
-    var montoSoles, correcta, alternativas;
+    var montoSoles, correcta, alternativas, trampa;
+    var trampaCorta = Math.random() < 0.7;
     do {
       montoSoles = 12 + Math.floor(Math.random()*180);
       correcta = greedyCombo(montoSoles);
       alternativas = correcta.length < COMBINA_MAX_PIEZAS ? shuffle(alternativasCombina(correcta)) : [];
-      // una alternativa por cantidad de piezas: las tres opciones deben
-      // tener un número de piezas distinto para que no haya empates.
+      // una alternativa por cantidad de piezas: las opciones que sí suman
+      // el monto deben tener un número de piezas distinto (sin empates).
       var porCantidad = {};
       alternativas = alternativas.filter(function(a){
         if (a.length === correcta.length || porCantidad[a.length]) return false;
         porCantidad[a.length] = true;
         return true;
       });
-    } while (alternativas.length < 2);
+      trampa = correcta.length >= 2 ? trampaCombina(correcta, montoSoles, trampaCorta) : null;
+    } while (alternativas.length < 2 || !trampa);
     var combos = shuffle([
       { piezas: correcta, correcta: true },
       { piezas: alternativas[0], correcta: false },
-      { piezas: alternativas[1], correcta: false }
+      { piezas: alternativas[1], correcta: false },
+      { piezas: trampa, correcta: false }
     ]);
     return {
-      enunciado: 'Quieres pagar exactamente S/ ' + montoSoles + '. ¿Cuál combinación usa la menor cantidad de billetes y monedas?',
+      enunciado: 'Quieres pagar exactamente S/ ' + montoSoles + '. ¿Cuál combinación suma S/ ' + montoSoles + ' con la menor cantidad de billetes y monedas?',
       combos: combos
     };
   }
@@ -906,7 +945,7 @@
           var piezasHtml = c.piezas.map(function(v){ return '<div class="pieza-mini">' + piezaIcono(v) + '</div>'; }).join('');
           return '<button class="combo-btn" data-i="' + i + '">' +
             '<div class="combo-piezas">' + piezasHtml + '</div>' +
-            '<span class="combo-count">' + c.piezas.length + ' piezas</span>' +
+            '<span class="combo-count">' + c.piezas.length + (c.piezas.length === 1 ? ' pieza' : ' piezas') + '</span>' +
           '</button>';
         }).join('') +
         '</div>';
